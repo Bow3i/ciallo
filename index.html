@@ -3,551 +3,789 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>阿斯塔纳轻轨术语有声手册</title>
+    <title>阿斯塔纳轻轨术语手册</title>
     <style>
-        :root { --primary: #0056b3; --bg: #f4f7f6; --card: #ffffff; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --primary: #0056b3; /* 工程蓝 */
+            --bg: #f4f6f8;
+            --white: #ffffff;
+            --text-main: #2c3e50;
+            --text-sub: #7f8c8d;
+            --border: #e1e4e8;
+        }
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text-main); -webkit-tap-highlight-color: transparent; }
         
-        /* 头部样式 */
-        .header { text-align: center; margin-bottom: 25px; }
-        .header h1 { font-size: 1.4rem; color: var(--primary); margin: 0; }
-        .header p { font-size: 0.8rem; color: #666; margin-top: 5px; }
-        
-        /* 搜索框悬浮 */
-        .search-container { position: sticky; top: 0; z-index: 99; background: var(--bg); padding: 10px 0; }
-        input { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 50px; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); outline: none; box-sizing: border-box; transition: all 0.3s; }
-        input:focus { border-color: var(--primary); box-shadow: 0 4px 12px rgba(0,86,179,0.15); }
+        /* 顶部导航 */
+        .navbar {
+            background: var(--primary); color: white; height: 56px; display: flex; align-items: center; padding: 0 16px;
+            position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .nav-back { 
+            font-size: 20px; padding: 8px 12px 8px 0; cursor: pointer; display: none; /* 默认隐藏 */
+        }
+        .nav-title { font-size: 18px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* 卡片列表 */
-        #container { padding-bottom: 40px; }
-        .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s; }
-        .card:active { transform: scale(0.99); }
-        
-        .row-zh { font-size: 1.1rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; color: #222; }
-        .badge { background: #f0f2f5; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; color: #666; font-weight: normal; }
-        .row-en { font-size: 0.95rem; color: #555; margin: 6px 0 15px 0; line-height: 1.4; }
-        
-        /* 播放按钮组 */
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        button { border: none; padding: 12px; border-radius: 8px; font-size: 0.95rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s; }
-        
-        /* 颜色配置 */
-        .btn-zh { background: #e3f2fd; color: #0056b3; }
-        .btn-zh:active { background: #bbdefb; }
-        
+        /* 主容器 */
+        .container { padding: 16px; max-width: 800px; margin: 0 auto; padding-bottom: 40px; }
+
+        /* 文件夹列表 (章节/小节) */
+        .list-group { list-style: none; padding: 0; margin: 0; }
+        .list-item {
+            background: var(--white); border-radius: 12px; padding: 20px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.2s;
+        }
+        .list-item:active { transform: scale(0.98); background-color: #f0f9ff; }
+        .item-info h3 { margin: 0 0 4px 0; font-size: 17px; color: var(--text-main); }
+        .item-info p { margin: 0; font-size: 13px; color: var(--text-sub); }
+        .item-arrow { color: #ccc; font-size: 18px; }
+
+        /* 词条卡片 */
+        .term-card {
+            background: var(--white); border-radius: 10px; padding: 16px; margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid var(--primary);
+        }
+        .term-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .term-zh { font-size: 18px; font-weight: 700; color: #333; line-height: 1.4; }
+        .term-id { font-size: 12px; background: #eeffff; color: #00838f; padding: 2px 6px; border-radius: 4px; font-family: Consolas, monospace; border: 1px solid #b2ebf2; white-space: nowrap; margin-left: 8px;}
+        .term-en { font-size: 15px; color: #555; margin-bottom: 16px; font-style: italic; line-height: 1.3; }
+
+        /* 按钮组 */
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn {
+            border: none; border-radius: 8px; padding: 10px 0; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500;
+        }
+        .btn-zh { background: #e3f2fd; color: #1565c0; }
         .btn-en { background: #fff3e0; color: #e65100; }
-        .btn-en:active { background: #ffe0b2; }
+        .btn-ru { background: #f3e5f5; color: #7b1fa2; }
+        .btn-kz { background: #e0f7fa; color: #006064; }
+        .btn:active { opacity: 0.7; transform: translateY(1px); }
 
-        /* 加载与错误提示 */
-        .loading { text-align: center; color: #999; margin-top: 50px; }
-        .playing { opacity: 0.7; transform: scale(0.98); }
+        /* 搜索框 */
+        .search-wrapper { position: sticky; top: 56px; z-index: 90; background: var(--bg); padding: 10px 0; display: none; }
+        .search-input {
+            width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 50px;
+            font-size: 16px; outline: none; box-sizing: border-box; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .search-input:focus { border-color: var(--primary); }
+        
+        /* 提示 */
+        .empty-tip { text-align: center; color: #999; margin-top: 40px; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>ASTANA LRT GLOSSARY</h1>
-    <p>阿斯塔纳轻轨项目术语有声手册</p>
-</div>
+    <div class="navbar">
+        <div class="nav-back" onclick="goBack()">❮ 返回</div>
+        <div class="nav-title" id="pageTitle">阿斯塔纳轻轨术语手册</div>
+    </div>
 
-<div class="search-container">
-    <input type="text" id="search" placeholder="🔍 搜索编号、中文或英文...">
-</div>
-
-<div id="container">
-    <div class="loading">正在加载数据...</div>
-</div>
+    <div class="container">
+        <!-- 搜索框 (仅在词条列表页显示) -->
+        <div class="search-wrapper" id="searchWrapper">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 在此小节内搜索...">
+        </div>
+        
+        <!-- 动态内容渲染区 -->
+        <div id="content"></div>
+    </div>
 
 <script>
-    // ==========================================
-    // 核心配置：Cloudflare 音频库地址
-    // ==========================================
-    // 您的音频文件地址格式为: https://main.ciallo-czx.pages.dev/audio/1_zh.mp3
-    const AUDIO_BASE_URL = "https://main.ciallo-czx.pages.dev/audio/";
+    // ===============================================
+    // 1. 配置区域
+    // ===============================================
+    // Cloudflare 音频库基地址 (无需 assets 前缀，直接指向 audio 文件夹)
+    const AUDIO_BASE = "https://main.ciallo-czx.pages.dev/audio/";
 
-    // 完整数据源 (404条)
-    const termData = [
-    {"id":"1","zh":"城市轨道交通","en":"urban rail transit"},
-    {"id":"2","zh":"运营设备","en":"operational equipment"},
-    {"id":"3","zh":"运营设施","en":"operational facilities"},
-    {"id":"4","zh":"冷滑","en":"propelled train dynamic test"},
-    {"id":"5","zh":"热滑","en":"powered train dynamic test"},
-    {"id":"6","zh":"系统联调","en":"system integration test"},
-    {"id":"7","zh":"甩项工程","en":"rejection project"},
-    {"id":"8","zh":"三权移交","en":"handover of three rights"},
-    {"id":"9","zh":"试运行","en":"trial run"},
-    {"id":"10","zh":"正式运营","en":"formal operation"},
-    {"id":"11","zh":"运营单位","en":"operation company"},
-    {"id":"12","zh":"行车组织","en":"train operation organization"},
-    {"id":"13","zh":"客运组织","en":"passenger service planning"},
-    {"id":"14","zh":"客运服务","en":"passenger transport service"},
-    {"id":"15","zh":"运输能力","en":"transportation capacity of system"},
-    {"id":"16","zh":"限界","en":"gauge"},
-    {"id":"17","zh":"设备限界","en":"equipment gauge"},
-    {"id":"18","zh":"建筑限界","en":"construction gauge"},
-    {"id":"19","zh":"检修修程","en":"examineandrepairprogram"},
-    {"id":"20","zh":"检修周期","en":"examine and repair interval"},
-    {"id":"21","zh":"故障修","en":"defection maintenance"},
-    {"id":"22","zh":"预防修","en":"preventive maintenance"},
-    {"id":"23","zh":"计划修","en":"scheduled maintenance"},
-    {"id":"24","zh":"状态修","en":"condition based maintenance"},
-    {"id":"25","zh":"均衡修","en":"balanced maintenance"},
-    {"id":"26","zh":"远端控制","en":"remote control"},
-    {"id":"27","zh":"倒切","en":"changeover"},
-    {"id":"28","zh":"全自动运行系统","en":"fully automatic operation"},
-    {"id":"29","zh":"保护区","en":"protective area"},
-    {"id":"30","zh":"正线","en":"main line"},
-    {"id":"31","zh":"配线","en":"siding"},
-    {"id":"32","zh":"出入线","en":"reception track"},
-    {"id":"33","zh":"折返线","en":"turnaround track"},
-    {"id":"34","zh":"联络线","en":"connecting track"},
-    {"id":"35","zh":"安全线","en":"overrun track"},
-    {"id":"36","zh":"停车线","en":"stabling track"},
-    {"id":"37","zh":"渡线","en":"transition track"},
-    {"id":"38","zh":"线路中心线","en":"center line of track"},
-    {"id":"39","zh":"线间距","en":"distance between center lines of tow neighboring track"},
-    {"id":"40","zh":"平交道口","en":"level crossing"},
-    {"id":"41","zh":"线路设计速度","en":"design speed"},
-    {"id":"42","zh":"轨道","en":"track"},
-    {"id":"43","zh":"轨距","en":"track gauge"},
-    {"id":"44","zh":"标准轨距","en":"standard gauge"},
-    {"id":"45","zh":"轨底坡","en":"railcant"},
-    {"id":"46","zh":"轨温","en":"rail temperature"},
-    {"id":"47","zh":"锁定轨温","en":"fastening down temperature"},
-    {"id":"48","zh":"轨行区","en":"running track area"},
-    {"id":"49","zh":"道岔","en":"point"},
-    {"id":"50","zh":"定位","en":"normal"},
-    {"id":"51","zh":"反位","en":"reverse"},
-    {"id":"52","zh":"轨道不平顺","en":"track irregularity"},
-    {"id":"53","zh":"方向","en":"alignment of track"},
-    {"id":"54","zh":"高低","en":"profile"},
-    {"id":"55","zh":"水平","en":"crossleveloftrack"},
-    {"id":"56","zh":"三角坑","en":"twist of track"},
-    {"id":"57","zh":"钢轨伤损","en":"rail defect"},
-    {"id":"58","zh":"钢轨磨耗","en":"rail wear"},
-    {"id":"59","zh":"线路中修","en":"intermediate repair of track"},
-    {"id":"60","zh":"爬行","en":"rail creeping"},
-    {"id":"61","zh":"胀轨跑道","en":"track buckling"},
-    {"id":"62","zh":"钢轨修理性打磨","en":"corrective grinding"},
-    {"id":"63","zh":"钢轨预防性打磨","en":"preventive grinding"},
-    {"id":"64","zh":"道床","en":"ballast bed"},
-    {"id":"65","zh":"道床纵向阻力","en":"longitudinal ballast resistance"},
-    {"id":"66","zh":"道床横向阻力","en":"lateral ballast resistance"},
-    {"id":"67","zh":"翻浆冒泥","en":"mud-pumping"},
-    {"id":"68","zh":"边坡剥落","en":"side slope"},
-    {"id":"69","zh":"边坡溜坍","en":"topsoil slip"},
-    {"id":"70","zh":"车站","en":"station"},
-    {"id":"71","zh":"车站出入口","en":"station entrance"},
-    {"id":"72","zh":"站厅","en":"station concourse"},
-    {"id":"73","zh":"站台","en":"platform"},
-    {"id":"74","zh":"岛式站台","en":"island platform"},
-    {"id":"75","zh":"侧式站台","en":"side platform"},
-    {"id":"76","zh":"站台高度","en":"platform height"},
-    {"id":"77","zh":"小站台","en":"restricted access platform"},
-    {"id":"78","zh":"站台头端","en":"headwall"},
-    {"id":"79","zh":"站台尾端","en":"tailwall"},
-    {"id":"80","zh":"站台计算长度","en":"calculated length of platform"},
-    {"id":"81","zh":"侧站台宽度","en":"side platform width"},
-    {"id":"82","zh":"车站公共区","en":"public area of station"},
-    {"id":"83","zh":"付费区","en":"paid area"},
-    {"id":"84","zh":"非付费区","en":"non-paid area"},
-    {"id":"85","zh":"安全出口","en":"emergency exit"},
-    {"id":"86","zh":"车辆","en":"vehicle"},
-    {"id":"87","zh":"车体","en":"vehicle body"},
-    {"id":"88","zh":"客室","en":"saloon"},
-    {"id":"89","zh":"司机室","en":"cab"},
-    {"id":"90","zh":"列车","en":"train"},
-    {"id":"91","zh":"车辆长度","en":"length of vehicle"},
-    {"id":"92","zh":"车辆宽度","en":"width of vehicle"},
-    {"id":"93","zh":"车辆高度","en":"height of vehicle"},
-    {"id":"94","zh":"车辆构造速度","en":"design speed of vehicle"},
-    {"id":"95","zh":"动车","en":"powered vehicle or motor vehicle"},
-    {"id":"96","zh":"拖车","en":"trailer car"},
-    {"id":"97","zh":"工程车","en":"engineering train"},
-    {"id":"98","zh":"列车编组","en":"train formation"},
-    {"id":"99","zh":"连挂","en":"marshaling"},
-    {"id":"100","zh":"解编","en":"unmarshaling"},
-    {"id":"101","zh":"一位端","en":"No.1 end of car"},
-    {"id":"102","zh":"二位端","en":"No.2 end of car"},
-    {"id":"103","zh":"一位侧","en":"No.1 position side"},
-    {"id":"104","zh":"二位侧","en":"No.2 position side"},
-    {"id":"105","zh":"定员","en":"passenger capacity"},
-    {"id":"106","zh":"有效站立面积","en":"standing area in carriage"},
-    {"id":"107","zh":"牵引系统","en":"traction system"},
-    {"id":"108","zh":"转向架","en":"bogie"},
-    {"id":"109","zh":"制动系统","en":"brake system"},
-    {"id":"110","zh":"紧急制动","en":"emergency braking"},
-    {"id":"111","zh":"常用制动","en":"service braking"},
-    {"id":"112","zh":"空气制动","en":"air braking"},
-    {"id":"113","zh":"电气制动","en":"electric braking"},
-    {"id":"114","zh":"停放制动","en":"parking braking"},
-    {"id":"115","zh":"车轮滑行","en":"wheel slide"},
-    {"id":"116","zh":"车轮空转","en":"wheel slip"},
-    {"id":"117","zh":"发车计时器","en":"train depart timer;TDT"},
-    {"id":"118","zh":"司机室紧急疏散门","en":"cab emergency exit door"},
-    {"id":"119","zh":"紧急制动按钮","en":"emergency braking switch"},
-    {"id":"120","zh":"车门防夹功能","en":"clamp-prevention function of door"},
-    {"id":"121","zh":"车门紧急解锁装置","en":"emergency unlocking device"},
-    {"id":"122","zh":"乘客紧急报警装置","en":"passengers alarm device"},
-    {"id":"123","zh":"车门安全隔离装置","en":"door safety isolation device"},
-    {"id":"124","zh":"测速定位","en":"speed and position detection"},
-    {"id":"125","zh":"固定轴距","en":"fixed wheel base"},
-    {"id":"126","zh":"车挡","en":"bufferstop"},
-    {"id":"127","zh":"轮重减载率","en":"wheel unloading ratio"},
-    {"id":"128","zh":"脱轨系数","en":"derailment coefficient"},
-    {"id":"129","zh":"车辆检修设施设备","en":"vehicle examine and repair facilities"},
-    {"id":"130","zh":"定修","en":"time-based maintenance"},
-    {"id":"131","zh":"架修","en":"un-wheeling maintenance"},
-    {"id":"132","zh":"大修","en":"overhaul"},
-    {"id":"133","zh":"车辆基地控制中心","en":"depot control center ; DCC"},
-    {"id":"134","zh":"停车场","en":"stabling yard"},
-    {"id":"135","zh":"车辆段","en":"depot"},
-    {"id":"136","zh":"车辆基地","en":"vehicle base"},
-    {"id":"137","zh":"列检线","en":"daily examine line"},
-    {"id":"138","zh":"镟轮线","en":"roulette line"},
-    {"id":"139","zh":"洗车线","en":"washing line"},
-    {"id":"140","zh":"检修线","en":"maintenance line"},
-    {"id":"141","zh":"试车线","en":"testtrack"},
-    {"id":"142","zh":"主变电所","en":"infeed substation"},
-    {"id":"143","zh":"牵引变电所","en":"traction substation"},
-    {"id":"144","zh":"集中式供电","en":"centralized power supply mode"},
-    {"id":"145","zh":"分散式供电","en":"distributed power supply mode"},
-    {"id":"146","zh":"接触轨","en":"contactrail system"},
-    {"id":"147","zh":"架空接触网","en":"overhead line system"},
-    {"id":"148","zh":"柔性接触网","en":"flexible catenary wire"},
-    {"id":"149","zh":"刚性接触网","en":"rigid conduct wire"},
-    {"id":"150","zh":"单边供电","en":"single-end feeding"},
-    {"id":"151","zh":"双边供电","en":"double-end feeding"},
-    {"id":"152","zh":"大双边供电","en":"double-end feeding for one-substation-outage"},
-    {"id":"153","zh":"越区供电","en":"cross-zone feeding"},
-    {"id":"154","zh":"供电分区","en":"power supply zone"},
-    {"id":"155","zh":"杂散电流","en":"stray current"},
-    {"id":"156","zh":"杂散电流腐蚀","en":"stray current corrosion"},
-    {"id":"157","zh":"保护电位","en":"protective potential"},
-    {"id":"158","zh":"排流装置","en":"stray current drainage devices"},
-    {"id":"159","zh":"回流线","en":"return cable"},
-    {"id":"160","zh":"回流点","en":"revenue point of traction current"},
-    {"id":"161","zh":"轨道电位","en":"track potential"},
-    {"id":"162","zh":"不间断电源系统","en":"uninterruptible power system; UPS"},
-    {"id":"163","zh":"应急照明","en":"emergency lighting"},
-    {"id":"164","zh":"疏散照明","en":"lighting for evacuation"},
-    {"id":"165","zh":"备用电源","en":"standby power source"},
-    {"id":"166","zh":"车载信号","en":"vehicle on-board signal"},
-    {"id":"167","zh":"地面信号","en":"wayside signal"},
-    {"id":"168","zh":"敌对信号","en":"conflicting signal"},
-    {"id":"169","zh":"信号机","en":"signal"},
-    {"id":"170","zh":"信号机前方","en":"in rear of a signal"},
-    {"id":"171","zh":"信号机后方","en":"inadvance of a signal"},
-    {"id":"172","zh":"信号开放","en":"signal at clear"},
-    {"id":"173","zh":"信号关闭","en":"signal at danger"},
-    {"id":"174","zh":"联锁","en":"interlocking"},
-    {"id":"175","zh":"联锁区","en":"interlocking area"},
-    {"id":"176","zh":"锁闭","en":"locking"},
-    {"id":"177","zh":"解锁","en":"release"},
-    {"id":"178","zh":"人工解锁","en":"manual release"},
-    {"id":"179","zh":"进路","en":"route"},
-    {"id":"180","zh":"线路占用表示","en":"track occupancy indication"},
-    {"id":"181","zh":"区段占用表示","en":"section occupancy indication"},
-    {"id":"182","zh":"挤岔报警","en":"alarm for trailed switch"},
-    {"id":"183","zh":"道岔转换","en":"switch transaction"},
-    {"id":"184","zh":"排列进路","en":"route setting"},
-    {"id":"185","zh":"预排进路","en":"route presetting"},
-    {"id":"186","zh":"取消进路","en":"cancel a route"},
-    {"id":"187","zh":"接近区段","en":"approach section"},
-    {"id":"188","zh":"保护区段","en":"overlap protection block section"},
-    {"id":"189","zh":"闭塞","en":"block"},
-    {"id":"190","zh":"闭塞分区","en":"block section"},
-    {"id":"191","zh":"移动闭塞","en":"moving block"},
-    {"id":"192","zh":"准移动闭塞","en":"quasi-moving block"},
-    {"id":"193","zh":"固定闭塞","en":"fixed block"},
-    {"id":"194","zh":"电话闭塞","en":"telephone block"},
-    {"id":"195","zh":"列车自动控制","en":"automatic train control;ATC"},
-    {"id":"196","zh":"列车自动监控","en":"automatic train supervision;ATS"},
-    {"id":"197","zh":"列车自动防护","en":"automatic train protection;ATP"},
-    {"id":"198","zh":"列车自动运行","en":"automatic train operation;ATO"},
-    {"id":"199","zh":"点式列车运行控制","en":"intermittent train control;ITC"},
-    {"id":"200","zh":"基于通信的列车运行控制","en":"communication based train control;CBTC"},
-    {"id":"201","zh":"列车自动驾驶模式","en":"automatic train operating mode;AM"},
-    {"id":"202","zh":"受控人工驾驶模式","en":"coded train operating mode;CM"},
-    {"id":"203","zh":"限制人工驾驶模式","en":"restricted train operating mode;RM"},
-    {"id":"204","zh":"全自动运行驾驶模式","en":"fully automatic train operating mode;FAM"},
-    {"id":"205","zh":"蠕动模式","en":"creep automatic mode;CAM"},
-    {"id":"206","zh":"远程限速运行模式","en":"remote restricted train operating mode;RRM"},
-    {"id":"207","zh":"应答器","en":"balise"},
-    {"id":"208","zh":"无源应答器","en":"fixed balise"},
-    {"id":"209","zh":"有源应答器","en":"switchable balise"},
-    {"id":"210","zh":"地面电子单元","en":"line side electronic unit; LEU"},
-    {"id":"211","zh":"移动授权","en":"movement authority;MA"},
-    {"id":"212","zh":"安全保护距离","en":"safety overlap"},
-    {"id":"213","zh":"ATP顶篷速度","en":"ATP ceiling speed"},
-    {"id":"214","zh":"ATO目标速度","en":"ATO target speed"},
-    {"id":"215","zh":"目标-距离模式","en":"target-distance mode"},
-    {"id":"216","zh":"定点停车","en":"fixed-poin tstopping"},
-    {"id":"217","zh":"侧冲防护","en":"flan kprotection"},
-    {"id":"218","zh":"轨道电路","en":"track circuit"},
-    {"id":"219","zh":"计轴","en":"axle counter"},
-    {"id":"220","zh":"计轴区段","en":"axle counter block"},
-    {"id":"221","zh":"计轴复位","en":"axle counter reset"},
-    {"id":"222","zh":"转辙机","en":"switch machine"},
-    {"id":"223","zh":"动作时间","en":"switching time"},
-    {"id":"224","zh":"动作次数","en":"throwing movements"},
-    {"id":"225","zh":"道岔失去表示","en":"loss of indiatio rfor a switch"},
-    {"id":"226","zh":"道岔错误表示","en":"false indication of a switch"},
-    {"id":"227","zh":"道岔中途转换","en":"switch thrown under moving cars"},
-    {"id":"228","zh":"互联互通运行的信号系统","en":"interoperability of the signaling system"},
-    {"id":"229","zh":"乘客信息系统","en":"passenger information system"},
-    {"id":"230","zh":"综合监控系统","en":"integrated supervision system"},
-    {"id":"231","zh":"车地宽带无线通信系统","en":"vehicle-ground brandband wireless communication system"},
-    {"id":"232","zh":"站台门","en":"platform screen door"},
-    {"id":"233","zh":"中央控制盘","en":"platform edge doors central control panel; PEC"},
-    {"id":"234","zh":"就地控制盘","en":"platform edge doors local control panel; PEL"},
-    {"id":"235","zh":"就地控制盒","en":"local control box; LCB"},
-    {"id":"236","zh":"综合应急后备盘","en":"integrated backup panel ;IBP"},
-    {"id":"237","zh":"端门","en":"platform end door"},
-    {"id":"238","zh":"站台紧急关闭按钮","en":"emergency stop button; ESB"},
-    {"id":"239","zh":"线路运营控制中心","en":"operations control center;OCC"},
-    {"id":"240","zh":"区间疏散平台","en":"evacuation platform"},
-    {"id":"241","zh":"平台疏散","en":"platform evacuation"},
-    {"id":"242","zh":"道床疏散","en":"ballast bed evacuation"},
-    {"id":"243","zh":"乘客服务中心","en":"customer service center"},
-    {"id":"244","zh":"安全标志","en":"safety sign"},
-    {"id":"245","zh":"导向标志","en":"direction sign"},
-    {"id":"246","zh":"禁止标志","en":"prohibition sign"},
-    {"id":"247","zh":"停车标","en":"stop sign"},
-    {"id":"248","zh":"警冲标","en":"fouling point sign post"},
-    {"id":"249","zh":"通风系统","en":"ventilation system"},
-    {"id":"250","zh":"火灾自动报警系统","en":"fire alarm system"},
-    {"id":"251","zh":"防火卷帘","en":"fire resisting shutter"},
-    {"id":"252","zh":"防火门","en":"fire resistance door"},
-    {"id":"253","zh":"防火分区","en":"fire compartment"},
-    {"id":"254","zh":"人防门","en":"civil air defense door"},
-    {"id":"255","zh":"自动扶梯","en":"escalator"},
-    {"id":"256","zh":"倾斜角","en":"angle of inclination"},
-    {"id":"257","zh":"自动人行道","en":"passenger conveyor"},
-    {"id":"258","zh":"提升高度","en":"rise of escalator"},
-    {"id":"259","zh":"额定速度","en":"rated speed of escalator"},
-    {"id":"260","zh":"变速运行","en":"velocity variation startup"},
-    {"id":"261","zh":"自动启动","en":"automatically startup"},
-    {"id":"262","zh":"扶手带入口保护装置","en":"handrail entry guard"},
-    {"id":"263","zh":"半自动售票机","en":"semi-automatic ticket vending machine"},
-    {"id":"264","zh":"自动售票机","en":"automatic ticket vending machine"},
-    {"id":"265","zh":"自动检票机","en":"automatic fare collection gate"},
-    {"id":"266","zh":"上行","en":"up direction"},
-    {"id":"267","zh":"下行","en":"down direction"},
-    {"id":"268","zh":"内环","en":"inner loop"},
-    {"id":"269","zh":"外环","en":"outer loop"},
-    {"id":"270","zh":"全日行车计划","en":"train operation plan per hour"},
-    {"id":"271","zh":"列车运行计划","en":"train operation plan"},
-    {"id":"272","zh":"列车运行图","en":"train operational diagram"},
-    {"id":"273","zh":"乘务计划","en":"train staff scheduler"},
-    {"id":"274","zh":"列车时刻表","en":"timetable of passenger train"},
-    {"id":"275","zh":"运营时间","en":"service time"},
-    {"id":"276","zh":"首班车","en":"first train"},
-    {"id":"277","zh":"首班车时间","en":"departure time of first train"},
-    {"id":"278","zh":"末班车","en":"last train"},
-    {"id":"279","zh":"末班车时间","en":"departure time of last train"},
-    {"id":"280","zh":"发车间隔","en":"train headway"},
-    {"id":"281","zh":"区间运行时分","en":"inter-station run time"},
-    {"id":"282","zh":"站停时间","en":"dwell time"},
-    {"id":"283","zh":"收车时间","en":"time of end operation"},
-    {"id":"284","zh":"列车交路","en":"train loop"},
-    {"id":"285","zh":"反向运行","en":"change end operation"},
-    {"id":"286","zh":"快慢车运行","en":"express/local running"},
-    {"id":"287","zh":"跳站运行","en":"skip-stop running"},
-    {"id":"288","zh":"单线双向运行","en":"single line bidirectional operation"},
-    {"id":"289","zh":"专运列车","en":"special train"},
-    {"id":"290","zh":"载客列车","en":"passenger train"},
-    {"id":"291","zh":"空驶列车","en":"empty train"},
-    {"id":"292","zh":"调试列车","en":"test train"},
-    {"id":"293","zh":"救援列车","en":"rescue train"},
-    {"id":"294","zh":"上线列车","en":"service train"},
-    {"id":"295","zh":"备用列车","en":"standby train"},
-    {"id":"296","zh":"计划列车","en":"planned train"},
-    {"id":"297","zh":"直达车","en":"through train"},
-    {"id":"298","zh":"正线出乘","en":"signing in main line"},
-    {"id":"299","zh":"行车调度命令","en":"train regulation command"},
-    {"id":"300","zh":"书面命令","en":"written command"},
-    {"id":"301","zh":"口头命令","en":"verbal command"},
-    {"id":"302","zh":"列车运行等级速度曲线","en":"speed curve of train-running level"},
-    {"id":"303","zh":"列车运行调整","en":"train operation adjustment"},
-    {"id":"304","zh":"扣车","en":"train hold"},
-    {"id":"305","zh":"变更交路","en":"change of loop service"},
-    {"id":"306","zh":"变更折返","en":"change of train turnaround"},
-    {"id":"307","zh":"加开列车","en":"additional train"},
-    {"id":"308","zh":"列车跳停","en":"train skipping station"},
-    {"id":"309","zh":"站控","en":"local station control"},
-    {"id":"310","zh":"中控","en":"central control"},
-    {"id":"311","zh":"列车出库","en":"train out of depot"},
-    {"id":"312","zh":"列车回库","en":"train backto depot"},
-    {"id":"313","zh":"添乘","en":"cab riding"},
-    {"id":"314","zh":"折返","en":"turnaround"},
-    {"id":"315","zh":"折返站","en":"turn-back station"},
-    {"id":"316","zh":"站前折返","en":"turn-back in front of station"},
-    {"id":"317","zh":"站后折返","en":"turn-back behind station"},
-    {"id":"318","zh":"调车","en":"shunting movement"},
-    {"id":"319","zh":"轧道","en":"pre-service run"},
-    {"id":"320","zh":"惰行","en":"coasting"},
-    {"id":"321","zh":"越行","en":"overtaking"},
-    {"id":"322","zh":"退行","en":"setback"},
-    {"id":"323","zh":"退行距离","en":"setback distance"},
-    {"id":"324","zh":"冒进信号","en":"signal passed at danger"},
-    {"id":"325","zh":"降级运行","en":"degradedoperation"},
-    {"id":"326","zh":"限速运行","en":"temporary speed restriction"},
-    {"id":"327","zh":"掉线","en":"train withdrawal"},
-    {"id":"328","zh":"列车救援","en":"assisting train operation"},
-    {"id":"329","zh":"推进运行","en":"push-out operation"},
-    {"id":"330","zh":"停运","en":"service suspension"},
-    {"id":"331","zh":"区段空闲","en":"section unoccupied"},
-    {"id":"332","zh":"区段占用","en":"section occupied"},
-    {"id":"333","zh":"道岔侧向临界速度","en":"critical speed of lateral turnout"},
-    {"id":"334","zh":"中断行车","en":"suspension of train movement"},
-    {"id":"335","zh":"列车脱轨","en":"train derailment"},
-    {"id":"336","zh":"列车冲突","en":"train confliction"},
-    {"id":"337","zh":"列车撞击","en":"train collision"},
-    {"id":"338","zh":"列车挤岔","en":"train running through point"},
-    {"id":"339","zh":"夹人夹物动车","en":"start train when people or objects shut"},
-    {"id":"340","zh":"正点率","en":"train punctuality ratio"},
-    {"id":"341","zh":"兑现率","en":"train service delivery ratio"},
-    {"id":"342","zh":"列车服务可靠度","en":"train service reliability"},
-    {"id":"343","zh":"列车退出正线运营故障率","en":"train withdrawal ratio"},
-    {"id":"344","zh":"行车凭证","en":"running token"},
-    {"id":"345","zh":"轧道车","en":"pre-service train"},
-    {"id":"346","zh":"客运计划","en":"passenger traffic plan"},
-    {"id":"347","zh":"开站","en":"station opening"},
-    {"id":"348","zh":"关站","en":"station closing"},
-    {"id":"349","zh":"客流冲突","en":"conflictingpassengerflow"},
-    {"id":"350","zh":"客流控制","en":"passenger flow control"},
-    {"id":"351","zh":"客流疏散","en":"passenger evacuation"},
-    {"id":"352","zh":"疏散路线","en":"evacuation route"},
-    {"id":"353","zh":"清客","en":"detrainment"},
-    {"id":"354","zh":"线路出清","en":"line clear"},
-    {"id":"355","zh":"站台监护作业","en":"platform supervision"},
-    {"id":"356","zh":"客流警戒线","en":"passenger flow alert value"},
-    {"id":"357","zh":"封站","en":"station close"},
-    {"id":"358","zh":"进站量","en":"passenger journey"},
-    {"id":"359","zh":"客运量","en":"passenger boarding"},
-    {"id":"360","zh":"断面客运量","en":"passenger boarding by section"},
-    {"id":"361","zh":"高峰小时系数","en":"peak hour flow rate"},
-    {"id":"362","zh":"服务用语","en":"service language"},
-    {"id":"363","zh":"票务服务","en":"ticket service"},
-    {"id":"364","zh":"问询服务","en":"enquiry service"},
-    {"id":"365","zh":"信息服务","en":"information service"},
-    {"id":"366","zh":"应急服务","en":"emergency service"},
-    {"id":"367","zh":"导乘服务","en":"guidance service"},
-    {"id":"368","zh":"自助服务","en":"self service"},
-    {"id":"369","zh":"服务质量","en":"service quality"},
-    {"id":"370","zh":"乘客事务处理","en":"passenger business processing"},
-    {"id":"371","zh":"客伤","en":"passenger injury and fatality"},
-    {"id":"372","zh":"乘客纠纷","en":"passenger conflict"},
-    {"id":"373","zh":"乘客投诉","en":"passenger complaint"},
-    {"id":"374","zh":"列车驾驶员","en":"train driver"},
-    {"id":"375","zh":"工程车驾驶员","en":"engineering vehicle driver"},
-    {"id":"376","zh":"驾驶学员","en":"driver trainee"},
-    {"id":"377","zh":"行车值班员","en":"on-duty station officer"},
-    {"id":"378","zh":"行车调度员","en":"traffic controller"},
-    {"id":"379","zh":"设备调度员","en":"system controller"},
-    {"id":"380","zh":"车场调度员","en":"depot controller"},
-    {"id":"381","zh":"站务员","en":"station staff"},
-    {"id":"382","zh":"值班站长","en":"on-duty station master"},
-    {"id":"383","zh":"中心站长","en":"group station manager"},
-    {"id":"384","zh":"桥隧检修工","en":"bridge and tunnel maintenance worker"},
-    {"id":"385","zh":"线路检修工","en":"track maintenance worker"},
-    {"id":"386","zh":"车辆检修工","en":"vehicle maintenance worker"},
-    {"id":"387","zh":"接触网检修工","en":"catenary wire maintenance worker"},
-    {"id":"388","zh":"通信工","en":"telecommunication system maintenance worker"},
-    {"id":"389","zh":"信号工","en":"signaling system maintenance worker"},
-    {"id":"390","zh":"机电检修工","en":"mechanical and electricale quipment maintenance worker"},
-    {"id":"391","zh":"车票","en":"ticket"},
-    {"id":"392","zh":"计程票制","en":"distance-based fare"},
-    {"id":"393","zh":"单程票","en":"single journey ticket"},
-    {"id":"394","zh":"储值票","en":"value-stored ticket"},
-    {"id":"395","zh":"计次票","en":"trip ticket"},
-    {"id":"396","zh":"二维码车票","en":"QR code ticket"},
-    {"id":"397","zh":"福利票","en":"welfare ticket"},
-    {"id":"398","zh":"纪念票","en":"souvenir ticket"},
-    {"id":"399","zh":"废票","en":"invalid ticket"},
-    {"id":"400","zh":"超时","en":"excess time"},
-    {"id":"401","zh":"超程","en":"excess journey"},
-    {"id":"402","zh":"清分","en":"clearing"},
-    {"id":"403","zh":"互联网票务","en":"internet ticketing"},
-    {"id":"404","zh":"互联网票务平台","en":"internet ticketing platform"}
+    // ===============================================
+    // 2. 完整结构化数据 (已按照您的文档重新编号)
+    // ===============================================
+    const MANUAL_DATA = [
+        {
+            "title": "一、基本术语",
+            "index": 1,
+            "sections": [
+                {
+                    "title": "基本术语",
+                    "index": 1,
+                    "terms": [
+                        {"id": "1-1-1", "zh": "城市轨道交通", "en": "urban rail transit"},
+                        {"id": "1-1-2", "zh": "运营设备", "en": "operational equipment"},
+                        {"id": "1-1-3", "zh": "运营设施", "en": "operational facilities"},
+                        {"id": "1-1-4", "zh": "冷滑", "en": "propelled train dynamic test"},
+                        {"id": "1-1-5", "zh": "热滑", "en": "powered train dynamic test"},
+                        {"id": "1-1-6", "zh": "系统联调", "en": "system integration test"},
+                        {"id": "1-1-7", "zh": "甩项工程", "en": "rejection project"},
+                        {"id": "1-1-8", "zh": "三权移交", "en": "handover of three rights"},
+                        {"id": "1-1-9", "zh": "试运行", "en": "trial run"},
+                        {"id": "1-1-10", "zh": "正式运营", "en": "formal operation"},
+                        {"id": "1-1-11", "zh": "运营单位", "en": "operation company"},
+                        {"id": "1-1-12", "zh": "行车组织", "en": "train operation organization"},
+                        {"id": "1-1-13", "zh": "客运组织", "en": "passenger service planning"},
+                        {"id": "1-1-14", "zh": "客运服务", "en": "passenger transport service"},
+                        {"id": "1-1-15", "zh": "运输能力", "en": "transportation capacity of system"},
+                        {"id": "1-1-16", "zh": "限界", "en": "gauge"},
+                        {"id": "1-1-17", "zh": "设备限界", "en": "equipment gauge"},
+                        {"id": "1-1-18", "zh": "建筑限界", "en": "construction gauge"},
+                        {"id": "1-1-19", "zh": "检修修程", "en": "examineandrepairprogram"},
+                        {"id": "1-1-20", "zh": "检修周期", "en": "examine and repair interval"},
+                        {"id": "1-1-21", "zh": "故障修", "en": "defection maintenance"},
+                        {"id": "1-1-22", "zh": "预防修", "en": "preventive maintenance"},
+                        {"id": "1-1-23", "zh": "计划修", "en": "scheduled maintenance"},
+                        {"id": "1-1-24", "zh": "状态修", "en": "condition based maintenance"},
+                        {"id": "1-1-25", "zh": "均衡修", "en": "balanced maintenance"},
+                        {"id": "1-1-26", "zh": "远端控制", "en": "remote control"},
+                        {"id": "1-1-27", "zh": "倒切", "en": "changeover"},
+                        {"id": "1-1-28", "zh": "全自动运行系统", "en": "fully automatic operation"},
+                        {"id": "1-1-29", "zh": "保护区", "en": "protective area"}
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "二、设施设备",
+            "index": 2,
+            "sections": [
+                {
+                    "title": "（一）线路",
+                    "index": 1,
+                    "terms": [
+                        {"id": "2-1-1", "zh": "正线", "en": "main line"},
+                        {"id": "2-1-2", "zh": "配线", "en": "siding"},
+                        {"id": "2-1-3", "zh": "出入线", "en": "reception track"},
+                        {"id": "2-1-4", "zh": "折返线", "en": "turnaround track"},
+                        {"id": "2-1-5", "zh": "联络线", "en": "connecting track"},
+                        {"id": "2-1-6", "zh": "安全线", "en": "overrun track"},
+                        {"id": "2-1-7", "zh": "停车线", "en": "stabling track"},
+                        {"id": "2-1-8", "zh": "渡线", "en": "transition track"},
+                        {"id": "2-1-9", "zh": "线路中心线", "en": "center line of track"},
+                        {"id": "2-1-10", "zh": "线间距", "en": "distance between center lines of tow neighboring track"},
+                        {"id": "2-1-11", "zh": "平交道口", "en": "level crossing"},
+                        {"id": "2-1-12", "zh": "线路设计速度", "en": "design speed"}
+                    ]
+                },
+                {
+                    "title": "（二）轨道",
+                    "index": 2,
+                    "terms": [
+                        {"id": "2-2-1", "zh": "轨道", "en": "track"},
+                        {"id": "2-2-2", "zh": "轨距", "en": "track gauge"},
+                        {"id": "2-2-3", "zh": "标准轨距", "en": "standard gauge"},
+                        {"id": "2-2-4", "zh": "轨底坡", "en": "railcant"},
+                        {"id": "2-2-5", "zh": "轨温", "en": "rail temperature"},
+                        {"id": "2-2-6", "zh": "锁定轨温", "en": "fastening down temperature"},
+                        {"id": "2-2-7", "zh": "轨行区", "en": "running track area"},
+                        {"id": "2-2-8", "zh": "道岔", "en": "point"},
+                        {"id": "2-2-9", "zh": "定位", "en": "normal"},
+                        {"id": "2-2-10", "zh": "反位", "en": "reverse"},
+                        {"id": "2-2-11", "zh": "轨道不平顺", "en": "track irregularity"},
+                        {"id": "2-2-12", "zh": "方向", "en": "alignment of track"},
+                        {"id": "2-2-13", "zh": "高低", "en": "profile"},
+                        {"id": "2-2-14", "zh": "水平", "en": "crossleveloftrack"},
+                        {"id": "2-2-15", "zh": "三角坑", "en": "twist of track"},
+                        {"id": "2-2-16", "zh": "钢轨伤损", "en": "rail defect"},
+                        {"id": "2-2-17", "zh": "钢轨磨耗", "en": "rail wear"},
+                        {"id": "2-2-18", "zh": "线路中修", "en": "intermediate repair of track"},
+                        {"id": "2-2-19", "zh": "爬行", "en": "rail creeping"},
+                        {"id": "2-2-20", "zh": "胀轨跑道", "en": "track buckling"},
+                        {"id": "2-2-21", "zh": "钢轨修理性打磨", "en": "corrective grinding"},
+                        {"id": "2-2-22", "zh": "钢轨预防性打磨", "en": "preventive grinding"},
+                        {"id": "2-2-23", "zh": "道床", "en": "ballast bed"},
+                        {"id": "2-2-24", "zh": "道床纵向阻力", "en": "longitudinal ballast resistance"},
+                        {"id": "2-2-25", "zh": "道床横向阻力", "en": "lateral ballast resistance"},
+                        {"id": "2-2-26", "zh": "翻浆冒泥", "en": "mud-pumping"},
+                        {"id": "2-2-27", "zh": "边坡剥落", "en": "side slope"},
+                        {"id": "2-2-28", "zh": "边坡溜坍", "en": "topsoil slip"}
+                    ]
+                },
+                {
+                    "title": "（三）车站建筑",
+                    "index": 3,
+                    "terms": [
+                        {"id": "2-3-1", "zh": "车站", "en": "station"},
+                        {"id": "2-3-2", "zh": "车站出入口", "en": "station entrance"},
+                        {"id": "2-3-3", "zh": "站厅", "en": "station concourse"},
+                        {"id": "2-3-4", "zh": "站台", "en": "platform"},
+                        {"id": "2-3-5", "zh": "岛式站台", "en": "island platform"},
+                        {"id": "2-3-6", "zh": "侧式站台", "en": "side platform"},
+                        {"id": "2-3-7", "zh": "站台高度", "en": "platform height"},
+                        {"id": "2-3-8", "zh": "小站台", "en": "restricted access platform"},
+                        {"id": "2-3-9", "zh": "站台头端", "en": "headwall"},
+                        {"id": "2-3-10", "zh": "站台尾端", "en": "tailwall"},
+                        {"id": "2-3-11", "zh": "站台计算长度", "en": "calculated length of platform"},
+                        {"id": "2-3-12", "zh": "侧站台宽度", "en": "side platform width"},
+                        {"id": "2-3-13", "zh": "车站公共区", "en": "public area of station"},
+                        {"id": "2-3-14", "zh": "付费区", "en": "paid area"},
+                        {"id": "2-3-15", "zh": "非付费区", "en": "non-paid area"},
+                        {"id": "2-3-16", "zh": "安全出口", "en": "emergency exit"}
+                    ]
+                },
+                {
+                    "title": "（四）车辆和车辆基地",
+                    "index": 4,
+                    "terms": [
+                        {"id": "2-4-1", "zh": "车辆", "en": "vehicle"},
+                        {"id": "2-4-2", "zh": "车体", "en": "vehicle body"},
+                        {"id": "2-4-3", "zh": "客室", "en": "saloon"},
+                        {"id": "2-4-4", "zh": "司机室", "en": "cab"},
+                        {"id": "2-4-5", "zh": "列车", "en": "train"},
+                        {"id": "2-4-6", "zh": "车辆长度", "en": "length of vehicle"},
+                        {"id": "2-4-7", "zh": "车辆宽度", "en": "width of vehicle"},
+                        {"id": "2-4-8", "zh": "车辆高度", "en": "height of vehicle"},
+                        {"id": "2-4-9", "zh": "车辆构造速度", "en": "design speed of vehicle"},
+                        {"id": "2-4-10", "zh": "动车", "en": "powered vehicle or motor vehicle"},
+                        {"id": "2-4-11", "zh": "拖车", "en": "trailer car"},
+                        {"id": "2-4-12", "zh": "工程车", "en": "engineering train"},
+                        {"id": "2-4-13", "zh": "列车编组", "en": "train formation"},
+                        {"id": "2-4-14", "zh": "连挂", "en": "marshaling"},
+                        {"id": "2-4-15", "zh": "解编", "en": "unmarshaling"},
+                        {"id": "2-4-16", "zh": "一位端", "en": "No.1 end of car"},
+                        {"id": "2-4-17", "zh": "二位端", "en": "No.2 end of car"},
+                        {"id": "2-4-18", "zh": "一位侧", "en": "No.1 position side"},
+                        {"id": "2-4-19", "zh": "二位侧", "en": "No.2 position side"},
+                        {"id": "2-4-20", "zh": "定员", "en": "passenger capacity"},
+                        {"id": "2-4-21", "zh": "有效站立面积", "en": "standing area in carriage"},
+                        {"id": "2-4-22", "zh": "牵引系统", "en": "traction system"},
+                        {"id": "2-4-23", "zh": "转向架", "en": "bogie"},
+                        {"id": "2-4-24", "zh": "制动系统", "en": "brake system"},
+                        {"id": "2-4-25", "zh": "紧急制动", "en": "emergency braking"},
+                        {"id": "2-4-26", "zh": "常用制动", "en": "service braking"},
+                        {"id": "2-4-27", "zh": "空气制动", "en": "air braking"},
+                        {"id": "2-4-28", "zh": "电气制动", "en": "electric braking"},
+                        {"id": "2-4-29", "zh": "停放制动", "en": "parking braking"},
+                        {"id": "2-4-30", "zh": "车轮滑行", "en": "wheel slide"},
+                        {"id": "2-4-31", "zh": "车轮空转", "en": "wheel slip"},
+                        {"id": "2-4-32", "zh": "发车计时器", "en": "train depart timer;TDT"},
+                        {"id": "2-4-33", "zh": "司机室紧急疏散门", "en": "cab emergency exit door"},
+                        {"id": "2-4-34", "zh": "紧急制动按钮", "en": "emergency braking switch"},
+                        {"id": "2-4-35", "zh": "车门防夹功能", "en": "clamp-prevention function of door"},
+                        {"id": "2-4-36", "zh": "车门紧急解锁装置", "en": "emergency unlocking device"},
+                        {"id": "2-4-37", "zh": "乘客紧急报警装置", "en": "passengers alarm device"},
+                        {"id": "2-4-38", "zh": "车门安全隔离装置", "en": "door safety isolation device"},
+                        {"id": "2-4-39", "zh": "测速定位", "en": "speed and position detection"},
+                        {"id": "2-4-40", "zh": "固定轴距", "en": "fixed wheel base"},
+                        {"id": "2-4-41", "zh": "车挡", "en": "bufferstop"},
+                        {"id": "2-4-42", "zh": "轮重减载率", "en": "wheel unloading ratio"},
+                        {"id": "2-4-43", "zh": "脱轨系数", "en": "derailment coefficient"},
+                        {"id": "2-4-44", "zh": "车辆检修设施设备", "en": "vehicle examine and repair facilities"},
+                        {"id": "2-4-45", "zh": "定修", "en": "time-based maintenance"},
+                        {"id": "2-4-46", "zh": "架修", "en": "un-wheeling maintenance"},
+                        {"id": "2-4-47", "zh": "大修", "en": "overhaul"},
+                        {"id": "2-4-48", "zh": "车辆基地控制中心", "en": "depot control center ; DCC"},
+                        {"id": "2-4-49", "zh": "停车场", "en": "stabling yard"},
+                        {"id": "2-4-50", "zh": "车辆段", "en": "depot"},
+                        {"id": "2-4-51", "zh": "车辆基地", "en": "vehicle base"},
+                        {"id": "2-4-52", "zh": "列检线", "en": "daily examine line"},
+                        {"id": "2-4-53", "zh": "镟轮线", "en": "roulette line"},
+                        {"id": "2-4-54", "zh": "洗车线", "en": "washing line"},
+                        {"id": "2-4-55", "zh": "检修线", "en": "maintenance line"},
+                        {"id": "2-4-56", "zh": "试车线", "en": "testtrack"}
+                    ]
+                },
+                {
+                    "title": "（五）供电",
+                    "index": 5,
+                    "terms": [
+                        {"id": "2-5-1", "zh": "主变电所", "en": "infeed substation"},
+                        {"id": "2-5-2", "zh": "牵引变电所", "en": "traction substation"},
+                        {"id": "2-5-3", "zh": "集中式供电", "en": "centralized power supply mode"},
+                        {"id": "2-5-4", "zh": "分散式供电", "en": "distributed power supply mode"},
+                        {"id": "2-5-5", "zh": "接触轨", "en": "contactrail system"},
+                        {"id": "2-5-6", "zh": "架空接触网", "en": "overhead line system"},
+                        {"id": "2-5-7", "zh": "柔性接触网", "en": "flexible catenary wire"},
+                        {"id": "2-5-8", "zh": "刚性接触网", "en": "rigid conduct wire"},
+                        {"id": "2-5-9", "zh": "单边供电", "en": "single-end feeding"},
+                        {"id": "2-5-10", "zh": "双边供电", "en": "double-end feeding"},
+                        {"id": "2-5-11", "zh": "大双边供电", "en": "double-end feeding for one-substation-outage"},
+                        {"id": "2-5-12", "zh": "越区供电", "en": "cross-zone feeding"},
+                        {"id": "2-5-13", "zh": "供电分区", "en": "power supply zone"},
+                        {"id": "2-5-14", "zh": "杂散电流", "en": "stray current"},
+                        {"id": "2-5-15", "zh": "杂散电流腐蚀", "en": "stray current corrosion"},
+                        {"id": "2-5-16", "zh": "保护电位", "en": "protective potential"},
+                        {"id": "2-5-17", "zh": "排流装置", "en": "stray current drainage devices"},
+                        {"id": "2-5-18", "zh": "回流线", "en": "return cable"},
+                        {"id": "2-5-19", "zh": "回流点", "en": "revenue point of traction current"},
+                        {"id": "2-5-20", "zh": "轨道电位", "en": "track potential"},
+                        {"id": "2-5-21", "zh": "不间断电源系统", "en": "uninterruptible power system; UPS"},
+                        {"id": "2-5-22", "zh": "应急照明", "en": "emergency lighting"},
+                        {"id": "2-5-23", "zh": "疏散照明", "en": "lighting for evacuation"},
+                        {"id": "2-5-24", "zh": "备用电源", "en": "standby power source"}
+                    ]
+                },
+                {
+                    "title": "（六）信号",
+                    "index": 6,
+                    "terms": [
+                        {"id": "2-6-1", "zh": "车载信号", "en": "vehicle on-board signal"},
+                        {"id": "2-6-2", "zh": "地面信号", "en": "wayside signal"},
+                        {"id": "2-6-3", "zh": "敌对信号", "en": "conflicting signal"},
+                        {"id": "2-6-4", "zh": "信号机", "en": "signal"},
+                        {"id": "2-6-5", "zh": "信号机前方", "en": "in rear of a signal"},
+                        {"id": "2-6-6", "zh": "信号机后方", "en": "inadvance of a signal"},
+                        {"id": "2-6-7", "zh": "信号开放", "en": "signal at clear"},
+                        {"id": "2-6-8", "zh": "信号关闭", "en": "signal at danger"},
+                        {"id": "2-6-9", "zh": "联锁", "en": "interlocking"},
+                        {"id": "2-6-10", "zh": "联锁区", "en": "interlocking area"},
+                        {"id": "2-6-11", "zh": "锁闭", "en": "locking"},
+                        {"id": "2-6-12", "zh": "解锁", "en": "release"},
+                        {"id": "2-6-13", "zh": "人工解锁", "en": "manual release"},
+                        {"id": "2-6-14", "zh": "进路", "en": "route"},
+                        {"id": "2-6-15", "zh": "线路占用表示", "en": "track occupancy indication"},
+                        {"id": "2-6-16", "zh": "区段占用表示", "en": "section occupancy indication"},
+                        {"id": "2-6-17", "zh": "挤岔报警", "en": "alarm for trailed switch"},
+                        {"id": "2-6-18", "zh": "道岔转换", "en": "switch transaction"},
+                        {"id": "2-6-19", "zh": "排列进路", "en": "route setting"},
+                        {"id": "2-6-20", "zh": "预排进路", "en": "route presetting"},
+                        {"id": "2-6-21", "zh": "取消进路", "en": "cancel a route"},
+                        {"id": "2-6-22", "zh": "接近区段", "en": "approach section"},
+                        {"id": "2-6-23", "zh": "保护区段", "en": "overlap protection block section"},
+                        {"id": "2-6-24", "zh": "闭塞", "en": "block"},
+                        {"id": "2-6-25", "zh": "闭塞分区", "en": "block section"},
+                        {"id": "2-6-26", "zh": "移动闭塞", "en": "moving block"},
+                        {"id": "2-6-27", "zh": "准移动闭塞", "en": "quasi-moving block"},
+                        {"id": "2-6-28", "zh": "固定闭塞", "en": "fixed block"},
+                        {"id": "2-6-29", "zh": "电话闭塞", "en": "telephone block"},
+                        {"id": "2-6-30", "zh": "列车自动控制", "en": "automatic train control;ATC"},
+                        {"id": "2-6-31", "zh": "列车自动监控", "en": "automatic train supervision;ATS"},
+                        {"id": "2-6-32", "zh": "列车自动防护", "en": "automatic train protection;ATP"},
+                        {"id": "2-6-33", "zh": "列车自动运行", "en": "automatic train operation;ATO"},
+                        {"id": "2-6-34", "zh": "点式列车运行控制", "en": "intermittent train control;ITC"},
+                        {"id": "2-6-35", "zh": "基于通信的列车运行控制", "en": "communication based train control;CBTC"},
+                        {"id": "2-6-36", "zh": "列车自动驾驶模式", "en": "automatic train operating mode;AM"},
+                        {"id": "2-6-37", "zh": "受控人工驾驶模式", "en": "coded train operating mode;CM"},
+                        {"id": "2-6-38", "zh": "限制人工驾驶模式", "en": "restricted train operating mode;RM"},
+                        {"id": "2-6-39", "zh": "全自动运行驾驶模式", "en": "fully automatic train operating mode;FAM"},
+                        {"id": "2-6-40", "zh": "蠕动模式", "en": "creep automatic mode;CAM"},
+                        {"id": "2-6-41", "zh": "远程限速运行模式", "en": "remote restricted train operating mode;RRM"},
+                        {"id": "2-6-42", "zh": "应答器", "en": "balise"},
+                        {"id": "2-6-43", "zh": "无源应答器", "en": "fixed balise"},
+                        {"id": "2-6-44", "zh": "有源应答器", "en": "switchable balise"},
+                        {"id": "2-6-45", "zh": "地面电子单元", "en": "line side electronic unit; LEU"},
+                        {"id": "2-6-46", "zh": "移动授权", "en": "movement authority;MA"},
+                        {"id": "2-6-47", "zh": "安全保护距离", "en": "safety overlap"},
+                        {"id": "2-6-48", "zh": "ATP顶篷速度", "en": "ATP ceiling speed"},
+                        {"id": "2-6-49", "zh": "ATO目标速度", "en": "ATO target speed"},
+                        {"id": "2-6-50", "zh": "目标-距离模式", "en": "target-distance mode"},
+                        {"id": "2-6-51", "zh": "定点停车", "en": "fixed-poin tstopping"},
+                        {"id": "2-6-52", "zh": "侧冲防护", "en": "flan kprotection"},
+                        {"id": "2-6-53", "zh": "轨道电路", "en": "track circuit"},
+                        {"id": "2-6-54", "zh": "计轴", "en": "axle counter"},
+                        {"id": "2-6-55", "zh": "计轴区段", "en": "axle counter block"},
+                        {"id": "2-6-56", "zh": "计轴复位", "en": "axle counter reset"},
+                        {"id": "2-6-57", "zh": "转辙机", "en": "switch machine"},
+                        {"id": "2-6-58", "zh": "动作时间", "en": "switching time"},
+                        {"id": "2-6-59", "zh": "动作次数", "en": "throwing movements"},
+                        {"id": "2-6-60", "zh": "道岔失去表示", "en": "loss of indiatio rfor a switch"},
+                        {"id": "2-6-61", "zh": "道岔错误表示", "en": "false indication of a switch"},
+                        {"id": "2-6-62", "zh": "道岔中途转换", "en": "switch thrown under moving cars"},
+                        {"id": "2-6-63", "zh": "互联互通运行的信号系统", "en": "interoperability of the signaling system"}
+                    ]
+                },
+                {
+                    "title": "（七）其他设施设备",
+                    "index": 7,
+                    "terms": [
+                        {"id": "2-7-1", "zh": "乘客信息系统", "en": "passenger information system"},
+                        {"id": "2-7-2", "zh": "综合监控系统", "en": "integrated supervision system"},
+                        {"id": "2-7-3", "zh": "车地宽带无线通信系统", "en": "vehicle-ground brandband wireless communication system"},
+                        {"id": "2-7-4", "zh": "站台门", "en": "platform screen door"},
+                        {"id": "2-7-5", "zh": "中央控制盘", "en": "platform edge doors central control panel; PEC"},
+                        {"id": "2-7-6", "zh": "就地控制盘", "en": "platform edge doors local control panel; PEL"},
+                        {"id": "2-7-7", "zh": "就地控制盒", "en": "local control box; LCB"},
+                        {"id": "2-7-8", "zh": "综合应急后备盘", "en": "integrated backup panel ;IBP"},
+                        {"id": "2-7-9", "zh": "端门", "en": "platform end door"},
+                        {"id": "2-7-10", "zh": "站台紧急关闭按钮", "en": "emergency stop button; ESB"},
+                        {"id": "2-7-11", "zh": "线路运营控制中心", "en": "operations control center;OCC"},
+                        {"id": "2-7-12", "zh": "区间疏散平台", "en": "evacuation platform"},
+                        {"id": "2-7-13", "zh": "平台疏散", "en": "platform evacuation"},
+                        {"id": "2-7-14", "zh": "道床疏散", "en": "ballast bed evacuation"},
+                        {"id": "2-7-15", "zh": "乘客服务中心", "en": "customer service center"},
+                        {"id": "2-7-16", "zh": "安全标志", "en": "safety sign"},
+                        {"id": "2-7-17", "zh": "导向标志", "en": "direction sign"},
+                        {"id": "2-7-18", "zh": "禁止标志", "en": "prohibition sign"},
+                        {"id": "2-7-19", "zh": "停车标", "en": "stop sign"},
+                        {"id": "2-7-20", "zh": "警冲标", "en": "fouling point sign post"},
+                        {"id": "2-7-21", "zh": "通风系统", "en": "ventilation system"},
+                        {"id": "2-7-22", "zh": "火灾自动报警系统", "en": "fire alarm system"},
+                        {"id": "2-7-23", "zh": "防火卷帘", "en": "fire resisting shutter"},
+                        {"id": "2-7-24", "zh": "防火门", "en": "fire resistance door"},
+                        {"id": "2-7-25", "zh": "防火分区", "en": "fire compartment"},
+                        {"id": "2-7-26", "zh": "人防门", "en": "civil air defense door"},
+                        {"id": "2-7-27", "zh": "自动扶梯", "en": "escalator"},
+                        {"id": "2-7-28", "zh": "倾斜角", "en": "angle of inclination"},
+                        {"id": "2-7-29", "zh": "自动人行道", "en": "passenger conveyor"},
+                        {"id": "2-7-30", "zh": "提升高度", "en": "rise of escalator"},
+                        {"id": "2-7-31", "zh": "额定速度", "en": "rated speed of escalator"},
+                        {"id": "2-7-32", "zh": "变速运行", "en": "velocity variation startup"},
+                        {"id": "2-7-33", "zh": "自动启动", "en": "automatically startup"},
+                        {"id": "2-7-34", "zh": "扶手带入口保护装置", "en": "handrail entry guard"},
+                        {"id": "2-7-35", "zh": "半自动售票机", "en": "semi-automatic ticket vending machine"},
+                        {"id": "2-7-36", "zh": "自动售票机", "en": "automatic ticket vending machine"},
+                        {"id": "2-7-37", "zh": "自动检票机", "en": "automatic fare collection gate"}
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "三、行车",
+            "index": 3,
+            "sections": [
+                {
+                    "title": "（一）运营计划",
+                    "index": 1,
+                    "terms": [
+                        {"id": "3-1-1", "zh": "上行", "en": "up direction"},
+                        {"id": "3-1-2", "zh": "下行", "en": "down direction"},
+                        {"id": "3-1-3", "zh": "内环", "en": "inner loop"},
+                        {"id": "3-1-4", "zh": "外环", "en": "outer loop"},
+                        {"id": "3-1-5", "zh": "全日行车计划", "en": "train operation plan per hour"},
+                        {"id": "3-1-6", "zh": "列车运行计划", "en": "train operation plan"},
+                        {"id": "3-1-7", "zh": "列车运行图", "en": "train operational diagram"},
+                        {"id": "3-1-8", "zh": "乘务计划", "en": "train staff scheduler"},
+                        {"id": "3-1-9", "zh": "列车时刻表", "en": "timetable of passenger train"},
+                        {"id": "3-1-10", "zh": "运营时间", "en": "service time"},
+                        {"id": "3-1-11", "zh": "首班车", "en": "first train"},
+                        {"id": "3-1-12", "zh": "首班车时间", "en": "departure time of first train"},
+                        {"id": "3-1-13", "zh": "末班车", "en": "last train"},
+                        {"id": "3-1-14", "zh": "末班车时间", "en": "departure time of last train"},
+                        {"id": "3-1-15", "zh": "发车间隔", "en": "train headway"},
+                        {"id": "3-1-16", "zh": "区间运行时分", "en": "inter-station run time"},
+                        {"id": "3-1-17", "zh": "站停时间", "en": "dwell time"},
+                        {"id": "3-1-18", "zh": "收车时间", "en": "time of end operation"},
+                        {"id": "3-1-19", "zh": "列车交路", "en": "train loop"},
+                        {"id": "3-1-20", "zh": "反向运行", "en": "change end operation"},
+                        {"id": "3-1-21", "zh": "快慢车运行", "en": "express/local running"},
+                        {"id": "3-1-22", "zh": "跳站运行", "en": "skip-stop running"},
+                        {"id": "3-1-23", "zh": "单线双向运行", "en": "single line bidirectional operation"},
+                        {"id": "3-1-24", "zh": "专运列车", "en": "special train"},
+                        {"id": "3-1-25", "zh": "载客列车", "en": "passenger train"},
+                        {"id": "3-1-26", "zh": "空驶列车", "en": "empty train"},
+                        {"id": "3-1-27", "zh": "调试列车", "en": "test train"},
+                        {"id": "3-1-28", "zh": "救援列车", "en": "rescue train"},
+                        {"id": "3-1-29", "zh": "上线列车", "en": "service train"},
+                        {"id": "3-1-30", "zh": "备用列车", "en": "standby train"},
+                        {"id": "3-1-31", "zh": "计划列车", "en": "planned train"},
+                        {"id": "3-1-32", "zh": "直达车", "en": "through train"},
+                        {"id": "3-1-33", "zh": "正线出乘", "en": "signing in main line"}
+                    ]
+                },
+                {
+                    "title": "（二）调度指挥",
+                    "index": 2,
+                    "terms": [
+                        {"id": "3-2-1", "zh": "行车调度命令", "en": "train regulation command"},
+                        {"id": "3-2-2", "zh": "书面命令", "en": "written command"},
+                        {"id": "3-2-3", "zh": "口头命令", "en": "verbal command"},
+                        {"id": "3-2-4", "zh": "列车运行等级速度曲线", "en": "speed curve of train-running level"},
+                        {"id": "3-2-5", "zh": "列车运行调整", "en": "train operation adjustment"},
+                        {"id": "3-2-6", "zh": "扣车", "en": "train hold"},
+                        {"id": "3-2-7", "zh": "变更交路", "en": "change of loop service"},
+                        {"id": "3-2-8", "zh": "变更折返", "en": "change of train turnaround"},
+                        {"id": "3-2-9", "zh": "加开列车", "en": "additional train"},
+                        {"id": "3-2-10", "zh": "列车跳停", "en": "train skipping station"},
+                        {"id": "3-2-11", "zh": "站控", "en": "local station control"},
+                        {"id": "3-2-12", "zh": "中控", "en": "central control"}
+                    ]
+                },
+                {
+                    "title": "（三）列车运行",
+                    "index": 3,
+                    "terms": [
+                        {"id": "3-3-1", "zh": "列车出库", "en": "train out of depot"},
+                        {"id": "3-3-2", "zh": "列车回库", "en": "train backto depot"},
+                        {"id": "3-3-3", "zh": "添乘", "en": "cab riding"},
+                        {"id": "3-3-4", "zh": "折返", "en": "turnaround"},
+                        {"id": "3-3-5", "zh": "折返站", "en": "turn-back station"},
+                        {"id": "3-3-6", "zh": "站前折返", "en": "turn-back in front of station"},
+                        {"id": "3-3-7", "zh": "站后折返", "en": "turn-back behind station"},
+                        {"id": "3-3-8", "zh": "调车", "en": "shunting movement"},
+                        {"id": "3-3-9", "zh": "轧道", "en": "pre-service run"},
+                        {"id": "3-3-10", "zh": "惰行", "en": "coasting"},
+                        {"id": "3-3-11", "zh": "越行", "en": "overtaking"},
+                        {"id": "3-3-12", "zh": "退行", "en": "setback"},
+                        {"id": "3-3-13", "zh": "退行距离", "en": "setback distance"},
+                        {"id": "3-3-14", "zh": "冒进信号", "en": "signal passed at danger"},
+                        {"id": "3-3-15", "zh": "降级运行", "en": "degradedoperation"},
+                        {"id": "3-3-16", "zh": "限速运行", "en": "temporary speed restriction"},
+                        {"id": "3-3-17", "zh": "掉线", "en": "train withdrawal"},
+                        {"id": "3-3-18", "zh": "列车救援", "en": "assisting train operation"},
+                        {"id": "3-3-19", "zh": "推进运行", "en": "push-out operation"},
+                        {"id": "3-3-20", "zh": "停运", "en": "service suspension"},
+                        {"id": "3-3-21", "zh": "区段空闲", "en": "section unoccupied"},
+                        {"id": "3-3-22", "zh": "区段占用", "en": "section occupied"},
+                        {"id": "3-3-23", "zh": "道岔侧向临界速度", "en": "critical speed of lateral turnout"},
+                        {"id": "3-3-24", "zh": "中断行车", "en": "suspension of train movement"},
+                        {"id": "3-3-25", "zh": "列车脱轨", "en": "train derailment"},
+                        {"id": "3-3-26", "zh": "列车冲突", "en": "train confliction"},
+                        {"id": "3-3-27", "zh": "列车撞击", "en": "train collision"},
+                        {"id": "3-3-28", "zh": "列车挤岔", "en": "train running through point"},
+                        {"id": "3-3-29", "zh": "夹人夹物动车", "en": "start train when people or objects shut"},
+                        {"id": "3-3-30", "zh": "正点率", "en": "train punctuality ratio"},
+                        {"id": "3-3-31", "zh": "兑现率", "en": "train service delivery ratio"},
+                        {"id": "3-3-32", "zh": "列车服务可靠度", "en": "train service reliability"},
+                        {"id": "3-3-33", "zh": "列车退出正线运营故障率", "en": "train withdrawal ratio"},
+                        {"id": "3-3-34", "zh": "行车凭证", "en": "running token"},
+                        {"id": "3-3-35", "zh": "轧道车", "en": "pre-service train"}
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "四、客运",
+            "index": 4,
+            "sections": [
+                {
+                    "title": "（一）客运组织",
+                    "index": 1,
+                    "terms": [
+                        {"id": "4-1-1", "zh": "客运计划", "en": "passenger traffic plan"},
+                        {"id": "4-1-2", "zh": "开站", "en": "station opening"},
+                        {"id": "4-1-3", "zh": "关站", "en": "station closing"},
+                        {"id": "4-1-4", "zh": "客流冲突", "en": "conflictingpassengerflow"},
+                        {"id": "4-1-5", "zh": "客流控制", "en": "passenger flow control"},
+                        {"id": "4-1-6", "zh": "客流疏散", "en": "passenger evacuation"},
+                        {"id": "4-1-7", "zh": "疏散路线", "en": "evacuation route"},
+                        {"id": "4-1-8", "zh": "清客", "en": "detrainment"},
+                        {"id": "4-1-9", "zh": "线路出清", "en": "line clear"},
+                        {"id": "4-1-10", "zh": "站台监护作业", "en": "platform supervision"},
+                        {"id": "4-1-11", "zh": "客流警戒线", "en": "passenger flow alert value"},
+                        {"id": "4-1-12", "zh": "封站", "en": "station close"},
+                        {"id": "4-1-13", "zh": "进站量", "en": "passenger journey"},
+                        {"id": "4-1-14", "zh": "客运量", "en": "passenger boarding"},
+                        {"id": "4-1-15", "zh": "断面客运量", "en": "passenger boarding by section"},
+                        {"id": "4-1-16", "zh": "高峰小时系数", "en": "peak hour flow rate"}
+                    ]
+                },
+                {
+                    "title": "（二）客运服务",
+                    "index": 2,
+                    "terms": [
+                        {"id": "4-2-1", "zh": "服务用语", "en": "service language"},
+                        {"id": "4-2-2", "zh": "票务服务", "en": "ticket service"},
+                        {"id": "4-2-3", "zh": "问询服务", "en": "enquiry service"},
+                        {"id": "4-2-4", "zh": "信息服务", "en": "information service"},
+                        {"id": "4-2-5", "zh": "应急服务", "en": "emergency service"},
+                        {"id": "4-2-6", "zh": "导乘服务", "en": "guidance service"},
+                        {"id": "4-2-7", "zh": "自助服务", "en": "self service"},
+                        {"id": "4-2-8", "zh": "服务质量", "en": "service quality"},
+                        {"id": "4-2-9", "zh": "乘客事务处理", "en": "passenger business processing"},
+                        {"id": "4-2-10", "zh": "客伤", "en": "passenger injury and fatality"},
+                        {"id": "4-2-11", "zh": "乘客纠纷", "en": "passenger conflict"},
+                        {"id": "4-2-12", "zh": "乘客投诉", "en": "passenger complaint"}
+                    ]
+                },
+                {
+                    "title": "（三）运营人员",
+                    "index": 3,
+                    "terms": [
+                        {"id": "4-3-1", "zh": "列车驾驶员", "en": "train driver"},
+                        {"id": "4-3-2", "zh": "工程车驾驶员", "en": "engineering vehicle driver"},
+                        {"id": "4-3-3", "zh": "驾驶学员", "en": "driver trainee"},
+                        {"id": "4-3-4", "zh": "行车值班员", "en": "on-duty station officer"},
+                        {"id": "4-3-5", "zh": "行车调度员", "en": "traffic controller"},
+                        {"id": "4-3-6", "zh": "设备调度员", "en": "system controller"},
+                        {"id": "4-3-7", "zh": "车场调度员", "en": "depot controller"},
+                        {"id": "4-3-8", "zh": "站务员", "en": "station staff"},
+                        {"id": "4-3-9", "zh": "值班站长", "en": "on-duty station master"},
+                        {"id": "4-3-10", "zh": "中心站长", "en": "group station manager"},
+                        {"id": "4-3-11", "zh": "桥隧检修工", "en": "bridge and tunnel maintenance worker"},
+                        {"id": "4-3-12", "zh": "线路检修工", "en": "track maintenance worker"},
+                        {"id": "4-3-13", "zh": "车辆检修工", "en": "vehicle maintenance worker"},
+                        {"id": "4-3-14", "zh": "接触网检修工", "en": "catenary wire maintenance worker"},
+                        {"id": "4-3-15", "zh": "通信工", "en": "telecommunication system maintenance worker"},
+                        {"id": "4-3-16", "zh": "信号工", "en": "signaling system maintenance worker"},
+                        {"id": "4-3-17", "zh": "机电检修工", "en": "mechanical and electricale quipment maintenance worker"}
+                    ]
+                },
+                {
+                    "title": "（四）票务",
+                    "index": 4,
+                    "terms": [
+                        {"id": "4-4-1", "zh": "车票", "en": "ticket"},
+                        {"id": "4-4-2", "zh": "计程票制", "en": "distance-based fare"},
+                        {"id": "4-4-3", "zh": "单程票", "en": "single journey ticket"},
+                        {"id": "4-4-4", "zh": "储值票", "en": "value-stored ticket"},
+                        {"id": "4-4-5", "zh": "计次票", "en": "trip ticket"},
+                        {"id": "4-4-6", "zh": "二维码车票", "en": "QR code ticket"},
+                        {"id": "4-4-7", "zh": "福利票", "en": "welfare ticket"},
+                        {"id": "4-4-8", "zh": "纪念票", "en": "souvenir ticket"},
+                        {"id": "4-4-9", "zh": "废票", "en": "invalid ticket"},
+                        {"id": "4-4-10", "zh": "超时", "en": "excess time"},
+                        {"id": "4-4-11", "zh": "超程", "en": "excess journey"},
+                        {"id": "4-4-12", "zh": "清分", "en": "clearing"},
+                        {"id": "4-4-13", "zh": "互联网票务", "en": "internet ticketing"},
+                        {"id": "4-4-14", "zh": "互联网票务平台", "en": "internet ticketing platform"}
+                    ]
+                }
+            ]
+        }
     ];
 
-    // 获取DOM元素
-    const container = document.getElementById('container');
-    const searchInput = document.getElementById('search');
+    // ===============================================
+    // 3. 应用逻辑
+    // ===============================================
 
-    // ==========================================
-    // 播放逻辑：强制使用 MP3
-    // ==========================================
-    function playAudio(id, lang) {
-        // 拼接完整路径
-        const path = `${AUDIO_BASE_URL}${id}_${lang}.mp3`;
+    // 状态
+    let appState = {
+        view: 'home', // home | chapter | section
+        chapIdx: null,
+        sectIdx: null
+    };
+
+    // DOM 元素
+    const content = document.getElementById('content');
+    const pageTitle = document.getElementById('pageTitle');
+    const navBack = document.querySelector('.nav-back');
+    const searchWrapper = document.getElementById('searchWrapper');
+    const searchInput = document.getElementById('searchInput');
+
+    // 初始化
+    renderHome();
+
+    // 1. 渲染首页（章节列表）
+    function renderHome() {
+        appState.view = 'home';
+        navBack.style.display = 'none';
+        searchWrapper.style.display = 'none';
+        pageTitle.textContent = "阿斯塔纳轻轨术语手册";
         
-        console.log("正在尝试播放:", path); // 调试日志
+        let html = '<ul class="list-group">';
+        MANUAL_DATA.forEach(chap => {
+            html += `
+                <li class="list-item" onclick="openChapter(${chap.index})">
+                    <div class="item-info">
+                        <h3>${chap.title}</h3>
+                        <p>共 ${chap.sections.length} 个小节</p>
+                    </div>
+                    <div class="item-arrow">❯</div>
+                </li>
+            `;
+        });
+        html += '</ul>';
+        content.innerHTML = html;
+    }
+
+    // 2. 渲染章节详情（小节列表）
+    window.openChapter = function(idx) {
+        appState.view = 'chapter';
+        appState.chapIdx = idx;
+        const chap = MANUAL_DATA.find(c => c.index === idx);
+        
+        navBack.style.display = 'block';
+        searchWrapper.style.display = 'none';
+        pageTitle.textContent = chap.title;
+
+        let html = '<ul class="list-group">';
+        chap.sections.forEach(sect => {
+            html += `
+                <li class="list-item" onclick="openSection(${sect.index})">
+                    <div class="item-info">
+                        <h3>${sect.title}</h3>
+                        <p>共 ${sect.terms.length} 个词条</p>
+                    </div>
+                    <div class="item-arrow">❯</div>
+                </li>
+            `;
+        });
+        html += '</ul>';
+        content.innerHTML = html;
+    }
+
+    // 3. 渲染小节详情（词条列表 + 搜索）
+    window.openSection = function(idx) {
+        appState.view = 'section';
+        appState.sectIdx = idx;
+        const chap = MANUAL_DATA.find(c => c.index === appState.chapIdx);
+        const sect = chap.sections.find(s => s.index === idx);
+        
+        navBack.style.display = 'block';
+        searchWrapper.style.display = 'block';
+        searchInput.value = ''; // 清空搜索
+        pageTitle.textContent = sect.title;
+
+        renderTerms(sect.terms);
+    }
+
+    // 渲染词条列表辅助函数
+    function renderTerms(terms) {
+        if (!terms || terms.length === 0) {
+            content.innerHTML = '<div class="empty-tip">暂无内容</div>';
+            return;
+        }
+
+        let html = '';
+        terms.forEach(term => {
+            html += `
+                <div class="term-card">
+                    <div class="term-header">
+                        <span class="term-zh">${term.zh}</span>
+                        <span class="term-id">${term.id}</span>
+                    </div>
+                    <div class="term-en">${term.en}</div>
+                    
+                    <div class="btn-grid">
+                        <button class="btn btn-zh" onclick="playAudio('${term.id}', 'zh')">🇨🇳 中文</button>
+                        <button class="btn btn-en" onclick="playAudio('${term.id}', 'en')">🇺🇸 English</button>
+                        <button class="btn btn-ru" onclick="playAudio('${term.id}', 'ru')">🇷🇺 Русский</button>
+                        <button class="btn btn-kz" onclick="playAudio('${term.id}', 'kz')">🇰🇿 Қазақша</button>
+                    </div>
+                </div>
+            `;
+        });
+        content.innerHTML = html;
+    }
+
+    // 搜索逻辑（仅过滤当前小节）
+    searchInput.addEventListener('input', (e) => {
+        if (appState.view !== 'section') return;
+        const keyword = e.target.value.toLowerCase().trim();
+        
+        const chap = MANUAL_DATA.find(c => c.index === appState.chapIdx);
+        const sect = chap.sections.find(s => s.index === appState.sectIdx);
+        
+        const filtered = sect.terms.filter(t => 
+            t.zh.includes(keyword) || 
+            t.en.toLowerCase().includes(keyword) || 
+            t.id.includes(keyword)
+        );
+        
+        renderTerms(filtered);
+    });
+
+    // 返回逻辑
+    window.goBack = function() {
+        if (appState.view === 'section') {
+            openChapter(appState.chapIdx);
+        } else if (appState.view === 'chapter') {
+            renderHome();
+        }
+    };
+
+    // 4. 播放控制（强制 Cloudflare）
+    window.playAudio = function(id, lang) {
+        const path = `${AUDIO_BASE}${id}_${lang}.mp3`;
+        console.log("Playing:", path); // 调试日志
         
         const audio = new Audio(path);
         
-        // 播放并处理错误
-        audio.play().catch(e => {
-            console.error("MP3播放失败:", e);
-            
-            // 降级策略：万一Cloudflare挂了或文件缺失，回退到系统发音
-            const item = termData.find(t => t.id === id);
-            if (item) {
-                const text = lang === 'zh' ? item.zh : item.en;
-                const u = new SpeechSynthesisUtterance(text);
+        audio.play().catch(err => {
+            console.error("Audio Load Error:", err);
+            // 降级回退（仅支持中英文）
+            if (lang === 'zh' || lang === 'en') {
+                const chap = MANUAL_DATA.find(c => c.index === parseInt(id.split('-')[0]));
+                const sect = chap.sections.find(s => s.index === parseInt(id.split('-')[1]));
+                const term = sect.terms.find(t => t.id === id);
+                
+                const u = new SpeechSynthesisUtterance(lang === 'zh' ? term.zh : term.en);
                 u.lang = lang === 'zh' ? 'zh-CN' : 'en-US';
                 u.rate = 0.9;
                 window.speechSynthesis.speak(u);
+            } else {
+                alert("音频文件暂未加载 (Audio not found)");
             }
         });
     }
-
-    // 渲染列表函数
-    function render(data) {
-        container.innerHTML = "";
-        if (data.length === 0) {
-            container.innerHTML = '<div class="loading">未找到相关术语</div>';
-            return;
-        }
-        
-        data.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'card';
-            
-            div.innerHTML = `
-                <div class="row-zh">
-                    ${item.zh}
-                    <span class="badge">#${item.id}</span>
-                </div>
-                <div class="row-en">${item.en}</div>
-                <div class="actions">
-                    <button class="btn-zh" onclick="playAudio('${item.id}', 'zh')">
-                        🔊 中文
-                    </button>
-                    <button class="btn-en" onclick="playAudio('${item.id}', 'en')">
-                        🔊 English
-                    </button>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    // 搜索监听
-    searchInput.addEventListener('input', (e) => {
-        const val = e.target.value.toLowerCase().trim();
-        const filtered = termData.filter(t => 
-            t.zh.includes(val) || 
-            t.en.toLowerCase().includes(val) || 
-            t.id === val
-        );
-        render(filtered);
-    });
-
-    // 初始渲染
-    render(termData);
 </script>
 </body>
 </html>
