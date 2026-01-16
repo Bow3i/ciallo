@@ -40,35 +40,39 @@
         }
         .term-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
         .term-zh { font-size: 18px; font-weight: 700; color: #333; line-height: 1.4; flex: 1; }
-        
-        /* 编号样式：只显示数字 */
-        .term-id { 
-            font-size: 14px; color: #999; font-weight: bold; 
-            margin-left: 10px; padding-top: 2px;
-        }
-
+        .term-id { font-size: 14px; color: #999; font-weight: bold; margin-left: 10px; padding-top: 2px; }
         .term-en { font-size: 15px; color: #555; margin-bottom: 16px; font-style: italic; line-height: 1.3; }
 
-        /* 按钮组：纯文字风格 */
+        /* 释义相关样式 */
+        .term-tools { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+        .btn-info {
+            background: none; border: 1px solid #ddd; border-radius: 20px; padding: 4px 12px;
+            font-size: 12px; color: #666; cursor: pointer; display: flex; align-items: center; gap: 4px;
+        }
+        .btn-info:active { background: #f5f5f5; }
+        
+        .term-desc {
+            background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 16px;
+            font-size: 14px; color: #444; line-height: 1.6; border: 1px solid #eee;
+            display: none; 
+        }
+        .term-desc.show { display: block; animation: fadeIn 0.2s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 按钮组 */
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .btn {
             border: none; border-radius: 6px; padding: 12px 0; font-size: 13px; cursor: pointer;
-            font-weight: 600; letter-spacing: 0.5px; transition: background 0.2s;
-            text-transform: uppercase; /* 大写英文 */
+            font-weight: 600; letter-spacing: 0.5px; transition: background 0.2s; text-transform: uppercase;
         }
-        /* 按钮配色 - 更专业的商务色调 */
-        .btn-zh { background: #e3f2fd; color: #1976d2; } /* 蓝 */
-        .btn-en { background: #fff3e0; color: #ef6c00; } /* 橙 */
-        .btn-ru { background: #f3e5f5; color: #7b1fa2; } /* 紫 */
-        .btn-kz { background: #e0f2f1; color: #00796b; } /* 青 */
-        
+        .btn-zh { background: #e3f2fd; color: #1976d2; }
+        .btn-en { background: #fff3e0; color: #ef6c00; }
+        .btn-ru { background: #f3e5f5; color: #7b1fa2; }
+        .btn-kz { background: #e0f2f1; color: #00796b; }
         .btn:active { opacity: 0.7; transform: translateY(1px); }
 
         .search-wrapper { position: sticky; top: 56px; z-index: 90; background: var(--bg); padding: 10px 0; display: none; }
-        .search-input {
-            width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 50px;
-            font-size: 16px; outline: none; box-sizing: border-box; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-        }
+        .search-input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 50px; font-size: 16px; outline: none; box-sizing: border-box; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
         .search-input:focus { border-color: var(--primary); }
         .empty-tip { text-align: center; color: #999; margin-top: 40px; }
     </style>
@@ -82,21 +86,19 @@
 
     <div class="container">
         <div class="search-wrapper" id="searchWrapper">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜索编号或中英文...">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜编号(如 9) 或中英文...">
         </div>
         <div id="content"></div>
     </div>
 
 <script>
-    // ===============================================
-    // 1. 配置区域：您的新音频库地址
-    // ===============================================
-    // 务必确保末尾有斜杠 /
+    // ================= 配置区 =================
+    // 音频库 (旧库)
     const AUDIO_BASE = "https://main.meguru.pages.dev/audio/";
+    // 释义库 (新库)
+    const JSON_BASE = "https://main.natsume-w22.pages.dev/json/";
 
-    // ===============================================
-    // 2. 完整数据
-    // ===============================================
+    // ================= 瘦身后的数据 (无desc字段) =================
     const MANUAL_DATA = [
         {
             "title": "一、基本术语", "index": 1, "sections": [
@@ -550,15 +552,16 @@
         }
     ];
 
-    // ===============================================
-    // 3. 应用逻辑
-    // ===============================================
-
+    // ================= 逻辑控制区 =================
+    
     let appState = {
-        view: 'home',
+        view: 'home', // home | chapter | section
         chapIdx: null,
         sectIdx: null
     };
+
+    // 缓存池 (存储已下载的释义数据，避免重复请求)
+    let descCache = {}; 
 
     const content = document.getElementById('content');
     const pageTitle = document.getElementById('pageTitle');
@@ -566,7 +569,11 @@
     const searchWrapper = document.getElementById('searchWrapper');
     const searchInput = document.getElementById('searchInput');
 
-    renderHome();
+    init();
+
+    function init() {
+        renderHome();
+    }
 
     function renderHome() {
         appState.view = 'home';
@@ -629,7 +636,6 @@
         renderTerms(sect.terms);
     }
 
-    // 核心修改：渲染词条时只显示尾号
     function renderTerms(terms) {
         if (!terms || terms.length === 0) {
             content.innerHTML = '<div class="empty-tip">暂无内容</div>';
@@ -638,23 +644,32 @@
 
         let html = '';
         terms.forEach(term => {
-            // 解析编号：将 "2-5-17" 拆分，取最后一个 "17"
-            // term.id 是完整的 "2-5-17"
             const shortId = term.id.split('-').pop(); 
-
+            // 注意：这里删除了 descText 的预渲染，改为点击后获取
             html += `
-                <div class="term-card">
+                <div class="term-card" id="card-${term.id}">
                     <div class="term-header">
                         <span class="term-zh">${term.zh}</span>
                         <span class="term-id">#${shortId}</span>
                     </div>
                     <div class="term-en">${term.en}</div>
                     
+                    <div class="term-tools">
+                        <button class="btn-info" onclick="toggleDesc('${term.id}')">
+                            ℹ️ 查看释义 / Definition
+                        </button>
+                    </div>
+                    
+                    <div class="term-desc" id="desc-${term.id}">
+                        <!-- 内容通过 JS 动态填充 -->
+                        正在加载释义...
+                    </div>
+                    
                     <div class="btn-grid">
-                        <button class="btn btn-zh" onclick="playAudio('${term.id}', 'zh')">中文</button>
+                        <button class="btn btn-zh" onclick="playAudio('${term.id}', 'zh')">中文 CN</button>
                         <button class="btn btn-en" onclick="playAudio('${term.id}', 'en')">English</button>
                         <button class="btn btn-ru" onclick="playAudio('${term.id}', 'ru')">Русский</button>
-                        <button class="btn btn-kz" onclick="playAudio('${term.id}', 'kz')">Қазақша</button>
+                        <button class="btn btn-kz" onclick="playAudio('${term.id}', 'kz')">Qazaqsha</button>
                     </div>
                 </div>
             `;
@@ -662,21 +677,69 @@
         content.innerHTML = html;
     }
 
-    // 核心修改：搜索逻辑支持搜尾号
+    // ===============================================
+    // 异步加载释义逻辑 (核心升级)
+    // ===============================================
+    window.toggleDesc = async function(id) {
+        const descBox = document.getElementById(`desc-${id}`);
+        
+        // 1. 如果已经显示，则隐藏
+        if (descBox.classList.contains('show')) {
+            descBox.classList.remove('show');
+            return;
+        }
+
+        // 2. 如果未显示，先显示“加载中”
+        descBox.classList.add('show');
+
+        // 3. 检查缓存池是否已有该 ID 的释义
+        if (descCache[id]) {
+            descBox.innerHTML = `<strong>释义：</strong><br>${descCache[id]}`;
+            return;
+        }
+
+        // 4. 如果没有缓存，解析章节号 (如 2-3) 去请求 JSON
+        const parts = id.split('-');
+        const sectionKey = `${parts[0]}-${parts[1]}`; // "2-3"
+        
+        try {
+            // 检查整个小节是否已缓存（避免重复请求同一个文件）
+            if (!descCache[`_loaded_${sectionKey}`]) {
+                const url = `${JSON_BASE}${sectionKey}.json`;
+                const resp = await fetch(url);
+                if (!resp.ok) throw new Error("Network response was not ok");
+                
+                const json = await resp.json();
+                
+                // 将下载下来的整个小节数据并入缓存池
+                Object.assign(descCache, json);
+                descCache[`_loaded_${sectionKey}`] = true; // 标记已下载
+            }
+
+            // 从缓存中读取并显示
+            const text = descCache[id] || "暂无详细释义 (No definition)。";
+            descBox.innerHTML = `<strong>释义：</strong><br>${text}`;
+
+        } catch (error) {
+            console.error("Fetch Error:", error);
+            descBox.innerHTML = "<span style='color:red'>加载失败，请检查网络。</span>";
+        }
+    }
+
+    // 搜索逻辑
     searchInput.addEventListener('input', (e) => {
         if (appState.view !== 'section') return;
         const keyword = e.target.value.toLowerCase().trim();
-        
         const chap = MANUAL_DATA.find(c => c.index === appState.chapIdx);
         const sect = chap.sections.find(s => s.index === appState.sectIdx);
         
         const filtered = sect.terms.filter(t => {
-            const shortId = t.id.split('-').pop(); // 提取 17
+            const shortId = t.id.split('-').pop();
             return (
                 t.zh.includes(keyword) || 
                 t.en.toLowerCase().includes(keyword) || 
-                shortId === keyword || // 支持搜 17
-                t.id === keyword // 依然支持搜完整 2-5-17
+                shortId === keyword ||
+                t.id === keyword
             );
         });
         
@@ -691,33 +754,22 @@
         }
     };
 
-    // 播放逻辑：依然使用完整 ID 拼接 URL
     window.playAudio = function(id, lang) {
         const path = `${AUDIO_BASE}${id}_${lang}.mp3`;
-        console.log("Playing:", path); 
-        
         const audio = new Audio(path);
-        
         audio.play().catch(err => {
-            console.error("Audio Load Error:", err);
-            // 降级提示
+            console.error("Audio Error:", err);
+            // 降级回退
             if (lang === 'zh' || lang === 'en') {
                 const chap = MANUAL_DATA.find(c => c.index === parseInt(id.split('-')[0]));
                 const sect = chap.sections.find(s => s.index === parseInt(id.split('-')[1]));
                 const term = sect.terms.find(t => t.id === id);
-                
                 const u = new SpeechSynthesisUtterance(lang === 'zh' ? term.zh : term.en);
                 u.lang = lang === 'zh' ? 'zh-CN' : 'en-US';
-                u.rate = 0.9;
                 window.speechSynthesis.speak(u);
-            } else {
-                // 俄语哈语如果不在线，暂无备选
-                // alert("Audio not found");
             }
         });
     }
 </script>
 </body>
 </html>
-
-
