@@ -6,29 +6,23 @@
     <title>阿斯塔纳轻轨术语手册</title>
     <style>
         :root {
-            --primary: #0056b3; /* 工程蓝 */
+            --primary: #0056b3; 
             --bg: #f4f6f8;
             --white: #ffffff;
             --text-main: #2c3e50;
             --text-sub: #7f8c8d;
-            --border: #e1e4e8;
         }
         body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text-main); -webkit-tap-highlight-color: transparent; }
         
-        /* 顶部导航 */
         .navbar {
             background: var(--primary); color: white; height: 56px; display: flex; align-items: center; padding: 0 16px;
             position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
-        .nav-back { 
-            font-size: 20px; padding: 8px 12px 8px 0; cursor: pointer; display: none; /* 默认隐藏 */
-        }
+        .nav-back { font-size: 20px; padding: 8px 12px 8px 0; cursor: pointer; display: none; }
         .nav-title { font-size: 18px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* 主容器 */
         .container { padding: 16px; max-width: 800px; margin: 0 auto; padding-bottom: 40px; }
 
-        /* 文件夹列表 (章节/小节) */
         .list-group { list-style: none; padding: 0; margin: 0; }
         .list-item {
             background: var(--white); border-radius: 12px; padding: 20px; margin-bottom: 12px;
@@ -40,37 +34,42 @@
         .item-info p { margin: 0; font-size: 13px; color: var(--text-sub); }
         .item-arrow { color: #ccc; font-size: 18px; }
 
-        /* 词条卡片 */
         .term-card {
             background: var(--white); border-radius: 10px; padding: 16px; margin-bottom: 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid var(--primary);
         }
         .term-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-        .term-zh { font-size: 18px; font-weight: 700; color: #333; line-height: 1.4; }
-        .term-id { font-size: 12px; background: #eeffff; color: #00838f; padding: 2px 6px; border-radius: 4px; font-family: Consolas, monospace; border: 1px solid #b2ebf2; white-space: nowrap; margin-left: 8px;}
+        .term-zh { font-size: 18px; font-weight: 700; color: #333; line-height: 1.4; flex: 1; }
+        
+        /* 编号样式：只显示数字 */
+        .term-id { 
+            font-size: 14px; color: #999; font-weight: bold; 
+            margin-left: 10px; padding-top: 2px;
+        }
+
         .term-en { font-size: 15px; color: #555; margin-bottom: 16px; font-style: italic; line-height: 1.3; }
 
-        /* 按钮组 */
+        /* 按钮组：纯文字风格 */
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .btn {
-            border: none; border-radius: 8px; padding: 10px 0; font-size: 14px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500;
+            border: none; border-radius: 6px; padding: 12px 0; font-size: 13px; cursor: pointer;
+            font-weight: 600; letter-spacing: 0.5px; transition: background 0.2s;
+            text-transform: uppercase; /* 大写英文 */
         }
-        .btn-zh { background: #e3f2fd; color: #1565c0; }
-        .btn-en { background: #fff3e0; color: #e65100; }
-        .btn-ru { background: #f3e5f5; color: #7b1fa2; }
-        .btn-kz { background: #e0f7fa; color: #006064; }
+        /* 按钮配色 - 更专业的商务色调 */
+        .btn-zh { background: #e3f2fd; color: #1976d2; } /* 蓝 */
+        .btn-en { background: #fff3e0; color: #ef6c00; } /* 橙 */
+        .btn-ru { background: #f3e5f5; color: #7b1fa2; } /* 紫 */
+        .btn-kz { background: #e0f2f1; color: #00796b; } /* 青 */
+        
         .btn:active { opacity: 0.7; transform: translateY(1px); }
 
-        /* 搜索框 */
         .search-wrapper { position: sticky; top: 56px; z-index: 90; background: var(--bg); padding: 10px 0; display: none; }
         .search-input {
             width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 50px;
             font-size: 16px; outline: none; box-sizing: border-box; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
         }
         .search-input:focus { border-color: var(--primary); }
-        
-        /* 提示 */
         .empty-tip { text-align: center; color: #999; margin-top: 40px; }
     </style>
 </head>
@@ -82,34 +81,26 @@
     </div>
 
     <div class="container">
-        <!-- 搜索框 (仅在词条列表页显示) -->
         <div class="search-wrapper" id="searchWrapper">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 在此小节内搜索...">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 搜编号(如 9) 或中英文...">
         </div>
-        
-        <!-- 动态内容渲染区 -->
         <div id="content"></div>
     </div>
 
 <script>
     // ===============================================
-    // 1. 配置区域
+    // 1. 配置区域：您的新音频库地址
     // ===============================================
-    // Cloudflare 音频库基地址 (无需 assets 前缀，直接指向 audio 文件夹)
-    const AUDIO_BASE = "https://main.ciallo-czx.pages.dev/audio/";
+    // 务必确保末尾有斜杠 /
+    const AUDIO_BASE = "https://main.meguru.pages.dev/audio/";
 
     // ===============================================
-    // 2. 完整结构化数据 (已按照您的文档重新编号)
+    // 2. 完整数据
     // ===============================================
     const MANUAL_DATA = [
         {
-            "title": "一、基本术语",
-            "index": 1,
-            "sections": [
-                {
-                    "title": "基本术语",
-                    "index": 1,
-                    "terms": [
+            "title": "一、基本术语", "index": 1, "sections": [
+                { "title": "基本术语", "index": 1, "terms": [
                         {"id": "1-1-1", "zh": "城市轨道交通", "en": "urban rail transit"},
                         {"id": "1-1-2", "zh": "运营设备", "en": "operational equipment"},
                         {"id": "1-1-3", "zh": "运营设施", "en": "operational facilities"},
@@ -139,18 +130,12 @@
                         {"id": "1-1-27", "zh": "倒切", "en": "changeover"},
                         {"id": "1-1-28", "zh": "全自动运行系统", "en": "fully automatic operation"},
                         {"id": "1-1-29", "zh": "保护区", "en": "protective area"}
-                    ]
-                }
+                ]}
             ]
         },
         {
-            "title": "二、设施设备",
-            "index": 2,
-            "sections": [
-                {
-                    "title": "（一）线路",
-                    "index": 1,
-                    "terms": [
+            "title": "二、设施设备", "index": 2, "sections": [
+                { "title": "（一）线路", "index": 1, "terms": [
                         {"id": "2-1-1", "zh": "正线", "en": "main line"},
                         {"id": "2-1-2", "zh": "配线", "en": "siding"},
                         {"id": "2-1-3", "zh": "出入线", "en": "reception track"},
@@ -163,12 +148,8 @@
                         {"id": "2-1-10", "zh": "线间距", "en": "distance between center lines of tow neighboring track"},
                         {"id": "2-1-11", "zh": "平交道口", "en": "level crossing"},
                         {"id": "2-1-12", "zh": "线路设计速度", "en": "design speed"}
-                    ]
-                },
-                {
-                    "title": "（二）轨道",
-                    "index": 2,
-                    "terms": [
+                ]},
+                { "title": "（二）轨道", "index": 2, "terms": [
                         {"id": "2-2-1", "zh": "轨道", "en": "track"},
                         {"id": "2-2-2", "zh": "轨距", "en": "track gauge"},
                         {"id": "2-2-3", "zh": "标准轨距", "en": "standard gauge"},
@@ -197,12 +178,8 @@
                         {"id": "2-2-26", "zh": "翻浆冒泥", "en": "mud-pumping"},
                         {"id": "2-2-27", "zh": "边坡剥落", "en": "side slope"},
                         {"id": "2-2-28", "zh": "边坡溜坍", "en": "topsoil slip"}
-                    ]
-                },
-                {
-                    "title": "（三）车站建筑",
-                    "index": 3,
-                    "terms": [
+                ]},
+                { "title": "（三）车站建筑", "index": 3, "terms": [
                         {"id": "2-3-1", "zh": "车站", "en": "station"},
                         {"id": "2-3-2", "zh": "车站出入口", "en": "station entrance"},
                         {"id": "2-3-3", "zh": "站厅", "en": "station concourse"},
@@ -219,12 +196,8 @@
                         {"id": "2-3-14", "zh": "付费区", "en": "paid area"},
                         {"id": "2-3-15", "zh": "非付费区", "en": "non-paid area"},
                         {"id": "2-3-16", "zh": "安全出口", "en": "emergency exit"}
-                    ]
-                },
-                {
-                    "title": "（四）车辆和车辆基地",
-                    "index": 4,
-                    "terms": [
+                ]},
+                { "title": "（四）车辆和车辆基地", "index": 4, "terms": [
                         {"id": "2-4-1", "zh": "车辆", "en": "vehicle"},
                         {"id": "2-4-2", "zh": "车体", "en": "vehicle body"},
                         {"id": "2-4-3", "zh": "客室", "en": "saloon"},
@@ -281,12 +254,8 @@
                         {"id": "2-4-54", "zh": "洗车线", "en": "washing line"},
                         {"id": "2-4-55", "zh": "检修线", "en": "maintenance line"},
                         {"id": "2-4-56", "zh": "试车线", "en": "testtrack"}
-                    ]
-                },
-                {
-                    "title": "（五）供电",
-                    "index": 5,
-                    "terms": [
+                ]},
+                { "title": "（五）供电", "index": 5, "terms": [
                         {"id": "2-5-1", "zh": "主变电所", "en": "infeed substation"},
                         {"id": "2-5-2", "zh": "牵引变电所", "en": "traction substation"},
                         {"id": "2-5-3", "zh": "集中式供电", "en": "centralized power supply mode"},
@@ -311,12 +280,8 @@
                         {"id": "2-5-22", "zh": "应急照明", "en": "emergency lighting"},
                         {"id": "2-5-23", "zh": "疏散照明", "en": "lighting for evacuation"},
                         {"id": "2-5-24", "zh": "备用电源", "en": "standby power source"}
-                    ]
-                },
-                {
-                    "title": "（六）信号",
-                    "index": 6,
-                    "terms": [
+                ]},
+                { "title": "（六）信号", "index": 6, "terms": [
                         {"id": "2-6-1", "zh": "车载信号", "en": "vehicle on-board signal"},
                         {"id": "2-6-2", "zh": "地面信号", "en": "wayside signal"},
                         {"id": "2-6-3", "zh": "敌对信号", "en": "conflicting signal"},
@@ -380,12 +345,8 @@
                         {"id": "2-6-61", "zh": "道岔错误表示", "en": "false indication of a switch"},
                         {"id": "2-6-62", "zh": "道岔中途转换", "en": "switch thrown under moving cars"},
                         {"id": "2-6-63", "zh": "互联互通运行的信号系统", "en": "interoperability of the signaling system"}
-                    ]
-                },
-                {
-                    "title": "（七）其他设施设备",
-                    "index": 7,
-                    "terms": [
+                ]},
+                { "title": "（七）其他设施设备", "index": 7, "terms": [
                         {"id": "2-7-1", "zh": "乘客信息系统", "en": "passenger information system"},
                         {"id": "2-7-2", "zh": "综合监控系统", "en": "integrated supervision system"},
                         {"id": "2-7-3", "zh": "车地宽带无线通信系统", "en": "vehicle-ground brandband wireless communication system"},
@@ -423,18 +384,12 @@
                         {"id": "2-7-35", "zh": "半自动售票机", "en": "semi-automatic ticket vending machine"},
                         {"id": "2-7-36", "zh": "自动售票机", "en": "automatic ticket vending machine"},
                         {"id": "2-7-37", "zh": "自动检票机", "en": "automatic fare collection gate"}
-                    ]
-                }
+                ]}
             ]
         },
         {
-            "title": "三、行车",
-            "index": 3,
-            "sections": [
-                {
-                    "title": "（一）运营计划",
-                    "index": 1,
-                    "terms": [
+            "title": "三、行车", "index": 3, "sections": [
+                { "title": "（一）运营计划", "index": 1, "terms": [
                         {"id": "3-1-1", "zh": "上行", "en": "up direction"},
                         {"id": "3-1-2", "zh": "下行", "en": "down direction"},
                         {"id": "3-1-3", "zh": "内环", "en": "inner loop"},
@@ -468,12 +423,8 @@
                         {"id": "3-1-31", "zh": "计划列车", "en": "planned train"},
                         {"id": "3-1-32", "zh": "直达车", "en": "through train"},
                         {"id": "3-1-33", "zh": "正线出乘", "en": "signing in main line"}
-                    ]
-                },
-                {
-                    "title": "（二）调度指挥",
-                    "index": 2,
-                    "terms": [
+                ]},
+                { "title": "（二）调度指挥", "index": 2, "terms": [
                         {"id": "3-2-1", "zh": "行车调度命令", "en": "train regulation command"},
                         {"id": "3-2-2", "zh": "书面命令", "en": "written command"},
                         {"id": "3-2-3", "zh": "口头命令", "en": "verbal command"},
@@ -486,12 +437,8 @@
                         {"id": "3-2-10", "zh": "列车跳停", "en": "train skipping station"},
                         {"id": "3-2-11", "zh": "站控", "en": "local station control"},
                         {"id": "3-2-12", "zh": "中控", "en": "central control"}
-                    ]
-                },
-                {
-                    "title": "（三）列车运行",
-                    "index": 3,
-                    "terms": [
+                ]},
+                { "title": "（三）列车运行", "index": 3, "terms": [
                         {"id": "3-3-1", "zh": "列车出库", "en": "train out of depot"},
                         {"id": "3-3-2", "zh": "列车回库", "en": "train backto depot"},
                         {"id": "3-3-3", "zh": "添乘", "en": "cab riding"},
@@ -527,18 +474,12 @@
                         {"id": "3-3-33", "zh": "列车退出正线运营故障率", "en": "train withdrawal ratio"},
                         {"id": "3-3-34", "zh": "行车凭证", "en": "running token"},
                         {"id": "3-3-35", "zh": "轧道车", "en": "pre-service train"}
-                    ]
-                }
+                ]}
             ]
         },
         {
-            "title": "四、客运",
-            "index": 4,
-            "sections": [
-                {
-                    "title": "（一）客运组织",
-                    "index": 1,
-                    "terms": [
+            "title": "四、客运", "index": 4, "sections": [
+                { "title": "（一）客运组织", "index": 1, "terms": [
                         {"id": "4-1-1", "zh": "客运计划", "en": "passenger traffic plan"},
                         {"id": "4-1-2", "zh": "开站", "en": "station opening"},
                         {"id": "4-1-3", "zh": "关站", "en": "station closing"},
@@ -555,12 +496,8 @@
                         {"id": "4-1-14", "zh": "客运量", "en": "passenger boarding"},
                         {"id": "4-1-15", "zh": "断面客运量", "en": "passenger boarding by section"},
                         {"id": "4-1-16", "zh": "高峰小时系数", "en": "peak hour flow rate"}
-                    ]
-                },
-                {
-                    "title": "（二）客运服务",
-                    "index": 2,
-                    "terms": [
+                ]},
+                { "title": "（二）客运服务", "index": 2, "terms": [
                         {"id": "4-2-1", "zh": "服务用语", "en": "service language"},
                         {"id": "4-2-2", "zh": "票务服务", "en": "ticket service"},
                         {"id": "4-2-3", "zh": "问询服务", "en": "enquiry service"},
@@ -573,12 +510,8 @@
                         {"id": "4-2-10", "zh": "客伤", "en": "passenger injury and fatality"},
                         {"id": "4-2-11", "zh": "乘客纠纷", "en": "passenger conflict"},
                         {"id": "4-2-12", "zh": "乘客投诉", "en": "passenger complaint"}
-                    ]
-                },
-                {
-                    "title": "（三）运营人员",
-                    "index": 3,
-                    "terms": [
+                ]},
+                { "title": "（三）运营人员", "index": 3, "terms": [
                         {"id": "4-3-1", "zh": "列车驾驶员", "en": "train driver"},
                         {"id": "4-3-2", "zh": "工程车驾驶员", "en": "engineering vehicle driver"},
                         {"id": "4-3-3", "zh": "驾驶学员", "en": "driver trainee"},
@@ -596,12 +529,8 @@
                         {"id": "4-3-15", "zh": "通信工", "en": "telecommunication system maintenance worker"},
                         {"id": "4-3-16", "zh": "信号工", "en": "signaling system maintenance worker"},
                         {"id": "4-3-17", "zh": "机电检修工", "en": "mechanical and electricale quipment maintenance worker"}
-                    ]
-                },
-                {
-                    "title": "（四）票务",
-                    "index": 4,
-                    "terms": [
+                ]},
+                { "title": "（四）票务", "index": 4, "terms": [
                         {"id": "4-4-1", "zh": "车票", "en": "ticket"},
                         {"id": "4-4-2", "zh": "计程票制", "en": "distance-based fare"},
                         {"id": "4-4-3", "zh": "单程票", "en": "single journey ticket"},
@@ -616,8 +545,7 @@
                         {"id": "4-4-12", "zh": "清分", "en": "clearing"},
                         {"id": "4-4-13", "zh": "互联网票务", "en": "internet ticketing"},
                         {"id": "4-4-14", "zh": "互联网票务平台", "en": "internet ticketing platform"}
-                    ]
-                }
+                ]}
             ]
         }
     ];
@@ -626,24 +554,20 @@
     // 3. 应用逻辑
     // ===============================================
 
-    // 状态
     let appState = {
-        view: 'home', // home | chapter | section
+        view: 'home',
         chapIdx: null,
         sectIdx: null
     };
 
-    // DOM 元素
     const content = document.getElementById('content');
     const pageTitle = document.getElementById('pageTitle');
     const navBack = document.querySelector('.nav-back');
     const searchWrapper = document.getElementById('searchWrapper');
     const searchInput = document.getElementById('searchInput');
 
-    // 初始化
     renderHome();
 
-    // 1. 渲染首页（章节列表）
     function renderHome() {
         appState.view = 'home';
         navBack.style.display = 'none';
@@ -666,7 +590,6 @@
         content.innerHTML = html;
     }
 
-    // 2. 渲染章节详情（小节列表）
     window.openChapter = function(idx) {
         appState.view = 'chapter';
         appState.chapIdx = idx;
@@ -692,7 +615,6 @@
         content.innerHTML = html;
     }
 
-    // 3. 渲染小节详情（词条列表 + 搜索）
     window.openSection = function(idx) {
         appState.view = 'section';
         appState.sectIdx = idx;
@@ -701,13 +623,13 @@
         
         navBack.style.display = 'block';
         searchWrapper.style.display = 'block';
-        searchInput.value = ''; // 清空搜索
+        searchInput.value = ''; 
         pageTitle.textContent = sect.title;
 
         renderTerms(sect.terms);
     }
 
-    // 渲染词条列表辅助函数
+    // 核心修改：渲染词条时只显示尾号
     function renderTerms(terms) {
         if (!terms || terms.length === 0) {
             content.innerHTML = '<div class="empty-tip">暂无内容</div>';
@@ -716,19 +638,23 @@
 
         let html = '';
         terms.forEach(term => {
+            // 解析编号：将 "2-5-17" 拆分，取最后一个 "17"
+            // term.id 是完整的 "2-5-17"
+            const shortId = term.id.split('-').pop(); 
+
             html += `
                 <div class="term-card">
                     <div class="term-header">
                         <span class="term-zh">${term.zh}</span>
-                        <span class="term-id">${term.id}</span>
+                        <span class="term-id">#${shortId}</span>
                     </div>
                     <div class="term-en">${term.en}</div>
                     
                     <div class="btn-grid">
-                        <button class="btn btn-zh" onclick="playAudio('${term.id}', 'zh')">🇨🇳 中文</button>
-                        <button class="btn btn-en" onclick="playAudio('${term.id}', 'en')">🇺🇸 English</button>
-                        <button class="btn btn-ru" onclick="playAudio('${term.id}', 'ru')">🇷🇺 Русский</button>
-                        <button class="btn btn-kz" onclick="playAudio('${term.id}', 'kz')">🇰🇿 Қазақша</button>
+                        <button class="btn btn-zh" onclick="playAudio('${term.id}', 'zh')">中文 CN</button>
+                        <button class="btn btn-en" onclick="playAudio('${term.id}', 'en')">English</button>
+                        <button class="btn btn-ru" onclick="playAudio('${term.id}', 'ru')">Русский</button>
+                        <button class="btn btn-kz" onclick="playAudio('${term.id}', 'kz')">Qazaqsha</button>
                     </div>
                 </div>
             `;
@@ -736,7 +662,7 @@
         content.innerHTML = html;
     }
 
-    // 搜索逻辑（仅过滤当前小节）
+    // 核心修改：搜索逻辑支持搜尾号
     searchInput.addEventListener('input', (e) => {
         if (appState.view !== 'section') return;
         const keyword = e.target.value.toLowerCase().trim();
@@ -744,16 +670,19 @@
         const chap = MANUAL_DATA.find(c => c.index === appState.chapIdx);
         const sect = chap.sections.find(s => s.index === appState.sectIdx);
         
-        const filtered = sect.terms.filter(t => 
-            t.zh.includes(keyword) || 
-            t.en.toLowerCase().includes(keyword) || 
-            t.id.includes(keyword)
-        );
+        const filtered = sect.terms.filter(t => {
+            const shortId = t.id.split('-').pop(); // 提取 17
+            return (
+                t.zh.includes(keyword) || 
+                t.en.toLowerCase().includes(keyword) || 
+                shortId === keyword || // 支持搜 17
+                t.id === keyword // 依然支持搜完整 2-5-17
+            );
+        });
         
         renderTerms(filtered);
     });
 
-    // 返回逻辑
     window.goBack = function() {
         if (appState.view === 'section') {
             openChapter(appState.chapIdx);
@@ -762,16 +691,16 @@
         }
     };
 
-    // 4. 播放控制（强制 Cloudflare）
+    // 播放逻辑：依然使用完整 ID 拼接 URL
     window.playAudio = function(id, lang) {
         const path = `${AUDIO_BASE}${id}_${lang}.mp3`;
-        console.log("Playing:", path); // 调试日志
+        console.log("Playing:", path); 
         
         const audio = new Audio(path);
         
         audio.play().catch(err => {
             console.error("Audio Load Error:", err);
-            // 降级回退（仅支持中英文）
+            // 降级提示
             if (lang === 'zh' || lang === 'en') {
                 const chap = MANUAL_DATA.find(c => c.index === parseInt(id.split('-')[0]));
                 const sect = chap.sections.find(s => s.index === parseInt(id.split('-')[1]));
@@ -782,7 +711,8 @@
                 u.rate = 0.9;
                 window.speechSynthesis.speak(u);
             } else {
-                alert("音频文件暂未加载 (Audio not found)");
+                // 俄语哈语如果不在线，暂无备选
+                // alert("Audio not found");
             }
         });
     }
