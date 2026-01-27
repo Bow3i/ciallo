@@ -79,8 +79,9 @@
             padding: 15px; background: white; border-bottom: 1px solid #eee; cursor: pointer;
         }
         .global-result-title { font-weight: bold; font-size: 16px; color: #333; margin-bottom: 4px; }
-        .global-result-sub { font-size: 14px; color: #666; }
-        .global-result-path { font-size: 12px; color: #999; margin-top: 4px; }
+        .global-result-sub { font-size: 14px; color: #666; margin-bottom: 4px;}
+        .global-result-en { font-size: 13px; color: #999; font-style: italic; }
+        .global-result-path { font-size: 12px; color: #bbb; margin-top: 6px; text-align: right;}
 
         .search-wrapper { position: sticky; top: 60px; z-index: 90; background: var(--bg); padding: 10px 0; }
         .search-input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 50px; font-size: 16px; outline: none; box-sizing: border-box; }
@@ -141,8 +142,8 @@
         }
     };
 
-    // ================= 完整数据 =================
-     const MANUAL_DATA = [
+       // ================= 完整数据 =================
+    const MANUAL_DATA = [
         {
             "title_zh": "一、基本术语", "title_ru": "I. Основная терминология", "index": 1, "sections": [
                 { "title_zh": "基本术语", "title_ru": "Основная терминология", "index": 1, "terms": [
@@ -595,7 +596,6 @@
         }
     ];
 
-
     let FLAT_INDEX = [];
     MANUAL_DATA.forEach(chap => {
         chap.sections.forEach(sect => {
@@ -611,7 +611,13 @@
         });
     });
 
-    let appState = { lang: 'cn', view: 'home', chapIdx: null, sectIdx: null };
+    let appState = {
+        lang: 'cn', 
+        view: 'home', 
+        chapIdx: null,
+        sectIdx: null,
+        keyword: '' 
+    };
     let descCache = {}; 
 
     const content = document.getElementById('content');
@@ -642,20 +648,30 @@
         }
     }
 
+    // ================= 状态恢复逻辑 =================
     function restoreState(state) {
         appState.view = state.view || 'home';
         appState.chapIdx = state.chapIdx;
         appState.sectIdx = state.sectIdx;
-        if (appState.view === 'home') renderHome();
-        else if (appState.view === 'chapter') renderChapter();
-        else if (appState.view === 'section') renderSection();
+        appState.keyword = state.keyword || ''; // 恢复关键词
+        
+        // 核心：如果 keyword 存在，必须回填到输入框，这样界面才不会空白
+        searchInput.value = appState.keyword;
+        
+        refreshCurrentView();
     }
 
     function navigateTo(view, chapIdx, sectIdx, replace = false) {
+        // 跳转到新页面时，通常清空搜索词 (除非您希望带着搜索词跳转)
+        // 这里设定为清空，因为从首页跳到详情页，详情页是局部搜索，首页词未必适用
+        // 但如果您是从"全局结果"点击进入"详情页"，此时详情页会重置为空白搜索
         appState.view = view;
         appState.chapIdx = chapIdx;
         appState.sectIdx = sectIdx;
-        const state = { view, chapIdx, sectIdx };
+        appState.keyword = ''; // 新页面默认无搜索
+        searchInput.value = '';
+
+        const state = { view, chapIdx, sectIdx, keyword: '' };
         let url = '#';
         if (view === 'chapter') url = `#chapter=${chapIdx}`;
         if (view === 'section') url = `#section=${chapIdx}-${sectIdx}`;
@@ -663,9 +679,16 @@
         if (replace) history.replaceState(state, '', url);
         else history.pushState(state, '', url);
 
-        if (view === 'home') renderHome();
-        else if (view === 'chapter') renderChapter();
-        else if (view === 'section') renderSection();
+        refreshCurrentView();
+    }
+
+    // 搜索输入时，更新 state (为了让后退时能记住)
+    function updateSearchState(val) {
+        appState.keyword = val;
+        // 使用 replaceState 更新当前历史记录，只改 state 中的 keyword，不产生新记录
+        const currentState = history.state || {};
+        currentState.keyword = val;
+        history.replaceState(currentState, '');
     }
 
     window.switchLang = function(lang) {
@@ -677,20 +700,26 @@
             langBtnCN.classList.add('active');
             langBtnRU.classList.remove('active');
         }
+        refreshCurrentView();
+    }
+
+    function refreshCurrentView() {
+        if (appState.keyword && appState.keyword.length > 0) {
+            handleSearchInput();
+            return;
+        }
         if (appState.view === 'home') renderHome();
         else if (appState.view === 'chapter') renderChapter();
         else if (appState.view === 'section') renderSection();
     }
 
-    // 1. 渲染首页 (已修正搜索框显示)
     function renderHome() {
         navBack.style.display = 'none';
-        searchWrapper.style.display = 'block'; // <--- 关键修正：确保首页搜索框可见
+        searchWrapper.style.display = 'block';
         
         const ui = UI_TEXT[appState.lang];
         pageTitle.textContent = ui.title;
         searchInput.placeholder = ui.search_home;
-        searchInput.value = '';
 
         let html = '<ul class="list-group">';
         MANUAL_DATA.forEach(chap => {
@@ -710,14 +739,12 @@
         content.innerHTML = html;
     }
 
-    // 2. 渲染章节
     function renderChapter() {
         const chap = MANUAL_DATA.find(c => c.index === appState.chapIdx);
         const ui = UI_TEXT[appState.lang];
         
         navBack.style.display = 'block';
-        searchWrapper.style.display = 'none'; // 章节页隐藏搜索
-        
+        searchWrapper.style.display = 'none';
         pageTitle.textContent = appState.lang === 'ru' ? chap.title_ru : chap.title_zh;
 
         let html = '<ul class="list-group">';
@@ -738,7 +765,6 @@
         content.innerHTML = html;
     }
 
-    // 3. 渲染小节
     function renderSection() {
         const chap = MANUAL_DATA.find(c => c.index === appState.chapIdx);
         const sect = chap.sections.find(s => s.index === appState.sectIdx);
@@ -747,7 +773,6 @@
         navBack.style.display = 'block';
         searchWrapper.style.display = 'block';
         searchInput.placeholder = ui.search_section;
-        searchInput.value = '';
         pageTitle.textContent = appState.lang === 'ru' ? sect.title_ru : sect.title_zh;
 
         renderTerms(sect.terms);
@@ -763,8 +788,14 @@
         let html = '';
         terms.forEach(term => {
             const shortId = term.id.split('-').pop(); 
-            let mainText = appState.lang === 'ru' ? term.ru : term.zh;
-            let subText = appState.lang === 'ru' ? term.zh : term.ru;
+            let mainText, subText;
+            if (appState.lang === 'ru') {
+                mainText = term.ru;
+                subText = term.zh; 
+            } else {
+                mainText = term.zh;
+                subText = term.ru;
+            }
 
             html += `
                 <div class="term-card" id="card-${term.id}">
@@ -792,9 +823,14 @@
     }
 
     searchInput.addEventListener('input', (e) => {
-        const keyword = e.target.value.toLowerCase().trim();
-        
-        // 局部搜索
+        const val = e.target.value.toLowerCase().trim();
+        updateSearchState(val); // 核心：实时保存搜索词到 History
+        handleSearchInput();
+    });
+
+    function handleSearchInput() {
+        const keyword = appState.keyword;
+
         if (appState.view === 'section') {
             const chap = MANUAL_DATA.find(c => c.index === appState.chapIdx);
             const sect = chap.sections.find(s => s.index === appState.sectIdx);
@@ -803,14 +839,15 @@
             return;
         }
 
-        // 全局搜索
-        if (appState.view === 'home' && keyword.length > 0) {
-            const results = FLAT_INDEX.filter(t => matchTerm(t, keyword));
-            renderGlobalResults(results);
-        } else if (appState.view === 'home' && keyword.length === 0) {
-            renderHome();
+        if (appState.view === 'home') {
+            if (keyword.length > 0) {
+                const results = FLAT_INDEX.filter(t => matchTerm(t, keyword));
+                renderGlobalResults(results);
+            } else {
+                renderHome();
+            }
         }
-    });
+    }
 
     function matchTerm(t, k) {
         const shortId = t.id.split('-').pop();
@@ -830,13 +867,22 @@
         }
         let html = '<div style="background:white; border-radius:12px; overflow:hidden;">';
         results.forEach(t => {
-            const main = appState.lang === 'ru' ? t.ru : t.zh;
+            // 搜索结果页也遵循主/副语言逻辑
+            let main, sub;
+            if (appState.lang === 'ru') {
+                main = t.ru;
+                sub = t.zh;
+            } else {
+                main = t.zh;
+                sub = t.ru;
+            }
             const path = appState.lang === 'ru' ? t.path_ru : t.path_zh;
             
             html += `
                 <div class="global-result-item" onclick="jumpToTerm(${t.chapIdx}, ${t.sectIdx}, '${t.id}')">
                     <div class="global-result-title">${main} <span style="font-size:12px;color:#999">#${t.id}</span></div>
-                    <div class="global-result-sub">${t.en}</div>
+                    <div class="global-result-sub">${sub}</div>
+                    <div class="global-result-en">${t.en}</div>
                     <div class="global-result-path">📂 ${path}</div>
                 </div>
             `;
