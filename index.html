@@ -936,9 +936,31 @@
         } catch (e) { descBox.innerHTML = "<span style='color:red'>Network Error</span>"; }
     }
 
+   let currentAudio = null;
+
     window.playAudio = function(id, lang) {
-        new Audio(`${AUDIO_BASE}${id}_${lang}.mp3`).play();
+        // 1. 检查是否有正在播放的音频 (Check if audio is playing)
+        if (currentAudio) {
+            currentAudio.pause();         // 暂停当前音频
+            currentAudio.currentTime = 0; // 将进度归零
+        }
+
+        const path = `${AUDIO_BASE}${id}_${lang}.mp3`;
+        
+        // 2. 创建新的音频对象，并赋值给全局变量
+        currentAudio = new Audio(path);
+        
+        // 3. 播放新的音频
+        currentAudio.play().catch(e => {
+            console.error("Audio play failed:", e);
+        });
+
+        // 监听播放结束事件，播放结束后清空变量
+        currentAudio.onended = function() {
+            currentAudio = null;
+        };
     }
 </script>
 </body>
 </html>
+
